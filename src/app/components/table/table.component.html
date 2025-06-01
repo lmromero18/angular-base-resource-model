@@ -1,0 +1,30 @@
+<table class="w-full table-auto border border-collapse border-gray-300">
+  <thead>
+    <tr>
+      @for (col of columns; track col.name) {
+        <th class="border p-2 text-left">
+          {{ col.label }}
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @if (rows.length > 0) {
+      @for (row of rows; track row.id_oficina) {
+        <tr>
+          @for (col of columns; track col.name) {
+            <td class="border p-2">
+              {{ row[col.name] }}
+            </td>
+          }
+        </tr>
+      }
+    } @else {
+      <tr>
+        <td [attr.colspan]="columns.length" class="text-center p-4">
+          No hay datos disponibles.
+        </td>
+      </tr>
+    }
+  </tbody>
+</table>
