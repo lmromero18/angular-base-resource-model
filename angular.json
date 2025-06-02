@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "angular-v20": {
+    "angular-ssr": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -87,10 +87,10 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "angular-v20:build:production"
+              "buildTarget": "angular-ssr:build:production"
             },
             "development": {
-              "buildTarget": "angular-v20:build:development"
+              "buildTarget": "angular-ssr:build:development"
             }
           },
           "defaultConfiguration": "development"

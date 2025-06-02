@@ -6,7 +6,6 @@ import {
 } from '@angular/ssr/node';
 import express from 'express';
 import { join } from 'node:path';
-import { SSR_COOKIES } from './app/core/interceptors/token.interceptor';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
@@ -41,21 +40,10 @@ app.use(
  */
 app.use((req, res, next) => {
   angularApp
-    .handle(req, {
-      providers: [
-        {
-          provide: SSR_COOKIES,
-          useValue: req.headers?.cookie || '',
-        },
-      ],
-    })
-    .then(response => {
-      if (response) {
-        writeResponseToNodeResponse(response, res);
-      } else {
-        next(new Error('Response is null'));
-      }
-    })
+    .handle(req)
+    .then((response) =>
+      response ? writeResponseToNodeResponse(response, res) : next(),
+    )
     .catch(next);
 });
 

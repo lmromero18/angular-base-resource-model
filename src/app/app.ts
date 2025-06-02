@@ -4,8 +4,8 @@ import { RouterOutlet } from '@angular/router';
 @Component({
   selector: 'app-root',
   imports: [RouterOutlet],
-  template: `<router-outlet></router-outlet>`,
+  template: `<router-outlet />`
 })
 export class App {
-  protected title = 'angular-v20';
+  protected title = 'angular-ssr';
 }

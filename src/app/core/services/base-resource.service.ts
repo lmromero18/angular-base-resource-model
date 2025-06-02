@@ -5,7 +5,7 @@ import { HttpClient, HttpHeaders } from "@angular/common/http";
 import { inject, Injectable, makeStateKey, TransferState } from "@angular/core";
 import { map, Observable, of, tap } from "rxjs";
 import { PaginatedResponse } from "../models/paginated-response.model";
-import { AuthService } from "./auth/auth.service";
+// import { AuthService } from "./auth/auth.service";
 
 /**
  * Clase abstracta base para la gestión de recursos con formularios dinámicos y endpoints RESTful.
@@ -27,7 +27,7 @@ export abstract class BaseResourceService {
     /** Atributos que definen el modelo del recurso */
     abstract attributes: Attribute[];
 
-    protected authService = inject(AuthService);
+    // protected authService = inject(AuthService);
 
     protected fb = new FormBuilder();
     protected _form!: FormGroup;
@@ -54,9 +54,9 @@ export abstract class BaseResourceService {
             return { withCredentials: true };
         }
 
-        const token = this.authService.getToken(); // o desde localStorage
+        // const token = this.authService.getToken(); // o desde localStorage
         const headers = new HttpHeaders({
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${'your-access-token'}`, // Reemplaza con tu lógica de token
             'Cache-Control': 'no-cache, no-store, must-revalidate',
         });
 
@@ -84,7 +84,7 @@ export abstract class BaseResourceService {
     }
 
     setParams(params: { [key: string]: any }): this {
-        return {...this.params, ...params} as this;
+        return { ...this.params, ...params } as this;
     }
 
     getParams(): { [key: string]: any } {
@@ -166,14 +166,14 @@ export abstract class BaseResourceService {
      * Obtiene todos los recursos desde el servidor (con soporte para TransferState en SSR).
      * @returns Observable con la colección de recursos
      */
-    getAll<T>(): Observable<PaginatedResponse<T>> {
+    getAll<T>(onSuccess?: (data: T[]) => void, onError?: (error: any) => void): void {
         const key = makeStateKey<T[]>(`${this.endpoint}-getAll`);
         console.log(`🔍 Ejecutando getAll para ${this.endpoint} en modo ${this.executionMode}`);
 
         // Usar TransferState si existe (cliente o servidor)
         if (this.transferState.hasKey(key)) {
             console.log(`🔍 Usando TransferState para ${this.endpoint}`);
-            
+
             const data = this.transferState.get<T[]>(key, []);
             this.transferState.remove(key);
 
@@ -204,14 +204,16 @@ export abstract class BaseResourceService {
             };
 
             console.log('✅ Usando datos cacheados desde TransferState');
-            return of(response);
+
+            if (onSuccess) onSuccess(data);
+            return;
         }
 
         // Realiza petición HTTP y guarda en TransferState si es SSR
-        return this.http.get<PaginatedResponse<T>>(this.getUrl(), {
+        this.http.get<PaginatedResponse<T>>(this.getUrl(), {
             withCredentials: true,
-        }).pipe(
-            tap(response => {
+        }).subscribe({
+            next: (response) => {
                 this.items = response.data;
                 this.pagination = {
                     currentPage: response.current_page,
@@ -226,9 +228,80 @@ export abstract class BaseResourceService {
                     this.transferState.set(key, response.data);
                     console.log('💾 Guardando datos en TransferState');
                 }
-            })
-        );
+
+                if (onSuccess) onSuccess(response.data);
+            },
+            error: (err) => {
+                if (onError) onError(err);
+            }
+        });
     }
+
+    // getAll<T>(): Observable<PaginatedResponse<T>> {
+    //     const key = makeStateKey<T[]>(`${this.endpoint}-getAll`);
+    //     console.log(`🔍 Ejecutando getAll para ${this.endpoint} en modo ${this.executionMode}`);
+
+    //     // Usar TransferState si existe (cliente o servidor)
+    //     if (this.transferState.hasKey(key)) {
+    //         console.log(`🔍 Usando TransferState para ${this.endpoint}`);
+
+    //         const data = this.transferState.get<T[]>(key, []);
+    //         this.transferState.remove(key);
+
+    //         const response: PaginatedResponse<T> = {
+    //             current_page: 1,
+    //             data,
+    //             first_page_url: '',
+    //             from: 1,
+    //             last_page: 1,
+    //             last_page_url: '',
+    //             links: [],
+    //             next_page_url: null,
+    //             path: '',
+    //             per_page: data.length,
+    //             prev_page_url: null,
+    //             to: data.length,
+    //             total: data.length,
+    //         };
+
+    //         this.items = data;
+    //         this.pagination = {
+    //             currentPage: 1,
+    //             lastPage: 1,
+    //             perPage: data.length,
+    //             total: data.length,
+    //             from: 1,
+    //             to: data.length,
+    //         };
+
+    //         console.log('✅ Usando datos cacheados desde TransferState');
+    //         return of(response);
+    //     }
+
+    //     // Realiza petición HTTP y guarda en TransferState si es SSR
+    //     return this.http.get<PaginatedResponse<T>>(this.getUrl(), {
+    //         withCredentials: true,
+    //     }).pipe(
+    //         tap(response => {
+    //             this.items = response.data;
+    //             this.pagination = {
+    //                 currentPage: response.current_page,
+    //                 lastPage: response.last_page,
+    //                 perPage: response.per_page,
+    //                 total: response.total,
+    //                 from: response.from,
+    //                 to: response.to,
+    //             };
+
+    //             if (this.executionMode === 'server') {
+    //                 this.transferState.set(key, response.data);
+    //                 console.log('💾 Guardando datos en TransferState');
+    //             }
+    //         })
+    //     );
+    // }
+
+
 
     show<T>(id: string | number): Observable<T> {
         const key = makeStateKey<T>(`${this.endpoint}-${id}-show`);

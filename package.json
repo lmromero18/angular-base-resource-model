@@ -1,5 +1,5 @@
 {
-  "name": "angular-v20",
+  "name": "angular-ssr",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -11,7 +11,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:angular-v20": "node dist/angular-v20/server/server.mjs"
+    "serve:ssr:angular-ssr": "node dist/angular-ssr/server/server.mjs"
   },
   "private": true,
   "dependencies": {
@@ -24,19 +24,24 @@
     "@angular/router": "^20.0.0",
     "@angular/ssr": "^20.0.0",
     "@auth0/angular-jwt": "^5.2.0",
-    "cookie": "^1.0.2",
+    "crypto-js": "^4.2.0",
     "express": "^5.1.0",
+    "lodash": "^4.17.21",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
+    "uuid": "^11.1.0",
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
     "@angular/build": "^20.0.0",
     "@angular/cli": "^20.0.0",
     "@angular/compiler-cli": "^20.0.0",
+    "@types/crypto-js": "^4.2.2",
     "@types/express": "^5.0.1",
     "@types/jasmine": "~5.1.0",
+    "@types/lodash": "^4.17.17",
     "@types/node": "^20.17.19",
+    "@types/uuid": "^10.0.0",
     "jasmine-core": "~5.7.0",
     "karma": "~6.4.0",
     "karma-chrome-launcher": "~3.2.0",
