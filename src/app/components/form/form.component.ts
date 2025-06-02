@@ -4,6 +4,8 @@ import { CommonModule } from '@angular/common';
 import { BaseResourceService } from '../../core/services/base-resource.service';
 import { Attribute } from '../../core/models/attribute.model';
 import { Observable, Subscription } from 'rxjs';
+import { ModelSelectOption } from '../../core/models/select-option.model';
+import { FormField } from '../../core/models/field-types';
 
 @Component({
     selector: 'app-form',
@@ -22,11 +24,13 @@ export class FormComponent implements OnInit {
     ngOnInit(): void {
         this.form = this.model.form;
         this.fields = this.model.getFormAttributes();
+
+        let select = this.fields.find(attr => attr.input?.type === 'select');
     }
 
     onSubmit() {
         if (this.form.valid) {
-            const executeSubmit = this.submitFn ?? (() => this.model.create());
+            const executeSubmit = this.submitFn ?? (() => this.model.post());
 
             executeSubmit().subscribe({
                 next: () => this.submitted.emit(),
@@ -38,5 +42,11 @@ export class FormComponent implements OnInit {
             console.warn('⚠️ Formulario inválido');
         }
     }
+
+    getSelectOptions(input: FormField): { label: string; value: any }[] {
+        return this.model.getSelectOptions(input);
+    }
+
+
 }
 

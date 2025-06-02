@@ -22,8 +22,6 @@ export const httpErrorInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, n
         error.statusText ||
         'Unexpected error occurred';
 
-      console.warn(`❌ HTTP Error: [${error.status}] ${message}`);
-
       if (error.status === 401 && isBrowser) {
         console.warn('🔒 Unauthorized - redirecting to /Ingresar');
         router.navigate(['/Ingresar']);

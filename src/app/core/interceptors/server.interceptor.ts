@@ -4,14 +4,10 @@ import { REQUEST } from '@angular/core';
 import { environment } from '../../../environments/environment';
 
 export const serverHttpInterceptor: HttpInterceptorFn = (req, next) => {
-  const requestFromExpress = inject(REQUEST, { optional: true });
-
-  console.log('Server HTTP Interceptor:', requestFromExpress);
-  
-
-  if (requestFromExpress) {
+  const request = inject(REQUEST, { optional: true });
+  if (request) {
     if (req.url.startsWith(environment.apiUrl)) {
-      const cookies = requestFromExpress.headers?.get('cookie');
+      const cookies = request.headers?.get('cookie');
       if (cookies) {
         const clonedReq = req.clone({
           setHeaders: {

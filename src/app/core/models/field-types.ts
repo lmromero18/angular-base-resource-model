@@ -1,4 +1,5 @@
 import { ValidatorFn } from "@angular/forms";
+import { ModelSelectOption } from "./select-option.model";
 
 export interface SelectOption {
     label: string;
@@ -13,7 +14,7 @@ export interface FormField {
     class?: string;
     disabled?: boolean;
     visible?: boolean;
-    options?: SelectOption[];
+    options?: ModelSelectOption | SelectOption[] | ((model: any) => ModelSelectOption[] | SelectOption[]);
     setter?: (value: any) => string | HTMLElement;
     validators?: ValidatorFn[];
 }

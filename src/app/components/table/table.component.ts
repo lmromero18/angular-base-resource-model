@@ -12,10 +12,13 @@ export class TableComponent implements OnInit {
     @Input() model!: BaseResourceService;
     @Input() endpoint?: string;
 
-    public columns: Attribute[] = [];
 
     get rows(): any[] {
         return this.model.items;
+    }
+
+    get columns(): Attribute[] {
+        return this.model.getListableAttributes();
     }
 
     ngOnInit(): void {
@@ -29,7 +32,7 @@ export class TableComponent implements OnInit {
         // this.columns = modelInstance.getListableAttributes();
         // modelInstance.getAll().subscribe(); // dispara la carga de datos
 
-        // console.log(this.model.items);
+        console.log(this.model.items);
 
     }
 }

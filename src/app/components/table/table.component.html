@@ -10,7 +10,7 @@
   </thead>
   <tbody>
     @if (rows.length > 0) {
-      @for (row of rows; track row.id_oficina) {
+      @for (row of rows; track row[model.primaryKey]) {
         <tr>
           @for (col of columns; track col.name) {
             <td class="border p-2">

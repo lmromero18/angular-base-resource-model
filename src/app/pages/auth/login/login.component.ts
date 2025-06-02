@@ -30,7 +30,7 @@ export class LoginComponent extends ControllerComponent<LoginService> {
    * @returns Observable con la respuesta del login
    */
   public submitFn = () =>
-    this.model.create<AuthResponse>().pipe(
+    this.model.post<AuthResponse>().pipe(
       tap((res) => {
         this.authService.savePayload(res);
         this.router.navigate(['/parametro-sistema']);

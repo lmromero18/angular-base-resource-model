@@ -30,9 +30,25 @@ export class LoginService extends BaseResourceService {
         required: true,
         class: 'col-span-12',
         setter(value) {
-            return value ? btoa(value) : '';
+          return value ? btoa(value) : '';
         },
         validators: [Validators.required],
+      },
+    }),
+    new Attribute({
+      name: 'tx_oficina',
+      label: 'Nombre de la Oficina',
+      input: {
+        type: 'select',
+        options: this.setSelectSource(
+          'nb_oficina',
+          'co_oficina',
+          (model: BaseResourceService) => model.from('v1/oficina')
+
+        ),
+        required: true,
+        class: 'col-span-12',
+
       },
     }),
   ];
