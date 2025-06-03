@@ -15,6 +15,7 @@ export const routes: Routes = [
     },
     {
         path: 'parametro-sistema',
+        canActivate: [authGuard],
         loadComponent: () =>
             import('./pages/parametro-sistema/parametro-sistema.component').then((m) => m.ParametroSistemaComponent),
     },

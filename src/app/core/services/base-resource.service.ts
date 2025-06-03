@@ -4,10 +4,10 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Observable, of, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Attribute } from '../models/attribute.model';
-import { FormField } from '../models/field-types';
 import { PaginatedResponse } from '../models/paginated-response.model';
 import { AuthService } from './auth/auth.service';
 import { ModelSelectOption } from '../models/select-option.model';
+import { FormField } from '../models/form-field.model';
 
 @Injectable({ providedIn: 'root' })
 export abstract class BaseResourceService {
@@ -23,6 +23,7 @@ export abstract class BaseResourceService {
     private executionMode: 'server' | 'client' = 'server';
     public params: HttpParams = new HttpParams();
     public items: any[] = [];
+    
     public pagination = {
         currentPage: 1,
         lastPage: 1,
@@ -75,13 +76,27 @@ export abstract class BaseResourceService {
 
     buildForm(initialData: any = {}): FormGroup {
         const group: { [key: string]: any } = {};
+
         for (const attr of this.getFormAttributes()) {
             const validators = [];
             if (attr.input?.required) validators.push(Validators.required);
-            group[attr.name] = [initialData[attr.name] ?? '', validators];
+
+            const initialValue = initialData[attr.name] ?? '';
+
+            group[attr.name] = [initialValue, validators];
         }
-        return this.fb.group(group);
+
+        const form = this.fb.group(group);
+
+        for (const attr of this.getFormAttributes()) {
+            if (attr.input instanceof FormField) {
+                attr.input.bindForm(attr.name, form);
+            }
+        }
+
+        return form;
     }
+
 
     getAttribute(name: string): Attribute | undefined {
         return this.attributes.find((a) => a.name === name);

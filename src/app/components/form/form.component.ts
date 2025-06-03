@@ -5,7 +5,7 @@ import { BaseResourceService } from '../../core/services/base-resource.service';
 import { Attribute } from '../../core/models/attribute.model';
 import { Observable, Subscription } from 'rxjs';
 import { ModelSelectOption } from '../../core/models/select-option.model';
-import { FormField } from '../../core/models/field-types';
+import { FormField } from '../../core/models/form-field.model';
 
 @Component({
     selector: 'app-form',

@@ -1,8 +1,8 @@
-import { inject, Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { BaseResourceService } from '../../../core/services/base-resource.service';
 import { Attribute } from '../../../core/models/attribute.model';
+import { FormField } from '../../../core/models/form-field.model';
+import { BaseResourceService } from '../../../core/services/base-resource.service';
 
 @Injectable({ providedIn: 'root' })
 export class LoginService extends BaseResourceService {
@@ -15,17 +15,17 @@ export class LoginService extends BaseResourceService {
     new Attribute({
       name: 'username',
       label: 'Correo electrónico',
-      input: {
+      input: new FormField({
         type: 'text',
         required: true,
         class: 'col-span-12',
         validators: [Validators.required],
-      },
+      }),
     }),
     new Attribute({
       name: 'password',
       label: 'Contraseña',
-      input: {
+      input: new FormField({
         type: 'password',
         required: true,
         class: 'col-span-12',
@@ -33,23 +33,22 @@ export class LoginService extends BaseResourceService {
           return value ? btoa(value) : '';
         },
         validators: [Validators.required],
-      },
+      }),
     }),
     new Attribute({
       name: 'tx_oficina',
       label: 'Nombre de la Oficina',
-      input: {
+      input: new FormField({
         type: 'select',
         options: this.setSelectSource(
           'nb_oficina',
           'co_oficina',
-          (model: BaseResourceService) => model.from('v1/oficina')
+          (model: BaseResourceService) => model.from('v1/prueba/oficina')
 
         ),
         required: true,
         class: 'col-span-12',
-
-      },
+      }),
     }),
   ];
 }

@@ -41,4 +41,8 @@ export class LoginComponent extends ControllerComponent<LoginService> {
       })
     );
 
+    ngDoCheck(){      
+      console.log(this.model.getAttribute('username')?.input?.value);
+      console.log(this.model.getAttribute('password')?.input?.value);
+    }
 }

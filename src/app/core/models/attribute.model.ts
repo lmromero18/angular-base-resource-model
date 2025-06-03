@@ -1,5 +1,6 @@
-import { FormField, TableField } from './field-types';
+import { TableField } from './field-types';
 import { ValidatorFn } from '@angular/forms';
+import { FormField } from './form-field.model';
 
 export class Attribute {
     name!: string;
@@ -16,7 +17,19 @@ export class Attribute {
     }) {
         this.name = config.name;
         this.label = config.label;
-        this.input = config.input;
+
+        this.input = config.input ?
+            new FormField({
+                type: config.input.type,
+                required: config.input.required ?? false,
+                placeholder: config.input.placeholder,
+                class: config.input.class,
+                disabled: config.input.disabled ?? false,
+                visible: config.input.visible ?? true,
+                options: config.input.options,
+                setter: config.input.setter,
+                validators: config.input.validators,
+            }) : undefined;
 
         this.table = {
             listable: config.table?.listable ?? true,
@@ -25,5 +38,6 @@ export class Attribute {
             align: config.table?.align ?? 'left',
             ...config.table,
         };
+
     }
 }
