@@ -1,6 +1,6 @@
 import { FormGroup } from '@angular/forms';
 import { Injector, Type } from '@angular/core';
-import { BaseResourceService } from '../services/base-resource.service';
+import { BaseResourceService } from '../services/base/base-resource.service';
 
 export abstract class ControllerComponent<T extends BaseResourceService> {
   protected _form!: FormGroup;

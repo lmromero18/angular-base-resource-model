@@ -1,7 +1,7 @@
 import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { BaseResourceService } from '../../core/services/base-resource.service';
+import { BaseResourceService } from '../../core/services/base/base-resource.service';
 import { Attribute } from '../../core/models/attribute.model';
 import { Observable, Subscription } from 'rxjs';
 import { ModelSelectOption } from '../../core/models/select-option.model';
@@ -15,7 +15,7 @@ import { FormField } from '../../core/models/form-field.model';
 })
 export class FormComponent implements OnInit {
     @Input() model!: BaseResourceService;
-    @Input() submitFn?: () => Observable<any>;
+    @Input() submitFn?: () => void;
     @Output() submitted = new EventEmitter<void>();
 
     form!: FormGroup;
@@ -30,18 +30,21 @@ export class FormComponent implements OnInit {
 
     onSubmit() {
         if (this.form.valid) {
-            const executeSubmit = this.submitFn ?? (() => this.model.post());
+            const executeSubmit = this.submitFn ?? (() =>
+                this.model.post(
+                    () => this.submitted.emit(),
+                    (err) => console.error('Error en el submit:', err)
+                )
+            );
 
-            executeSubmit().subscribe({
-                next: () => this.submitted.emit(),
-                error: (err) => console.error('❌ Error en el submit:', err),
-            });
+            executeSubmit();
 
         } else {
             this.form.markAllAsTouched();
-            console.warn('⚠️ Formulario inválido');
+            console.warn('Formulario inválido');
         }
     }
+
 
     getSelectOptions(input: FormField): { label: string; value: any }[] {
         return this.model.getSelectOptions(input);

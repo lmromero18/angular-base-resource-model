@@ -1,5 +1,5 @@
 import { FormGroup, ValidatorFn } from "@angular/forms";
-import { SelectOption } from "./field-types";
+import { ISelectOption } from "./field-types";
 import { ModelSelectOption } from "./select-option.model";
 
 export class FormField {
@@ -9,7 +9,7 @@ export class FormField {
     class?: string;
     disabled?: boolean;
     visible?: boolean;
-    options?: ModelSelectOption | SelectOption[] | ((model: any) => ModelSelectOption[] | SelectOption[]);
+    options?: ModelSelectOption | ISelectOption[] | ((model: any) => ModelSelectOption[] | ISelectOption[]);
     setter?: (value: any) => string | HTMLElement;
     validators?: ValidatorFn[];
 
@@ -22,7 +22,7 @@ export class FormField {
         class?: string;
         disabled?: boolean;
         visible?: boolean;
-        options?: ModelSelectOption | SelectOption[] | ((model: any) => ModelSelectOption[] | SelectOption[]);
+        options?: ModelSelectOption | ISelectOption[] | ((model: any) => ModelSelectOption[] | ISelectOption[]);
         setter?: (value: any) => string | HTMLElement;
         validators?: ValidatorFn[];
         value?: any;

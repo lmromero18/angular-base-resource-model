@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { Validators } from '@angular/forms';
 import { Attribute } from '../../../core/models/attribute.model';
 import { FormField } from '../../../core/models/form-field.model';
-import { BaseResourceService } from '../../../core/services/base-resource.service';
+import { BaseResourceService } from '../../../core/services/base/base-resource.service';
 
 @Injectable({ providedIn: 'root' })
 export class LoginService extends BaseResourceService {

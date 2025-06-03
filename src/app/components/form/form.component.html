@@ -1,25 +1,18 @@
-<form [formGroup]="form" (ngSubmit)="onSubmit()"
-  class="grid grid-cols-12 gap-4">
+<form [formGroup]="form" (ngSubmit)="onSubmit()" class="grid grid-cols-12 gap-4">
 
   @for (attr of fields; track attr.name) {
 
   @if (attr.input?.type === 'text') {
   <div [class]="attr.input?.class ?? 'col-span-12'">
     <label>{{ attr.label }}</label>
-    <input
-      [formControlName]="attr.name"
-      type="text"
-      class="input" />
+    <input [formControlName]="attr.name" type="text" class="input" />
   </div>
   }
 
   @if (attr.input?.type === 'password') {
   <div [class]="attr.input?.class ?? 'col-span-12'">
     <label>{{ attr.label }}</label>
-    <input
-      [formControlName]="attr.name"
-      type="password"
-      class="input" />
+    <input [formControlName]="attr.name" type="password" class="input" />
   </div>
   }
 
@@ -27,11 +20,11 @@
   <div [class]="attr.input?.class ?? 'col-span-12'">
     <label>{{ attr.label }}</label>
     <select [formControlName]="attr.name" class="input">
-      @for (opt of getSelectOptions(attr.input!); track opt.value) {
+      @for (opt of getSelectOptions(attr.input!) ; track $index) {
       <option [value]="opt.value">{{ opt.label }}</option>
       }
-
     </select>
+
   </div>
   }
 

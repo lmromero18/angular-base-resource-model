@@ -42,6 +42,8 @@ export class AuthService {
         if (this.isBrowser) {
             return sessionStorage.getItem(key);
         } else if (this.request && this.request.headers) {
+            console.log(`Request headers: ${JSON.stringify(this.request.headers)}`);
+            
             if (this.request.headers.cookie) {
                 const cookies = this.request.headers.cookie.split(';').map(cookie => cookie.trim());
                 const found = cookies.find(cookie => cookie.startsWith(`${key}=`));
@@ -113,8 +115,7 @@ export class AuthService {
         });
     }
 
-    public isValid(): boolean {
-        const token = this.getToken();
+    public isValid(token:string): boolean {
         return token ? !this.jwtHelperService.isTokenExpired(token) : false;
     }
 

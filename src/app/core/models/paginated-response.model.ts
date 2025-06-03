@@ -1,4 +1,4 @@
-export interface PaginatedResponse<T> {
+export interface IPaginatedResponse<T> {
     current_page: number;
     data: T[];
     first_page_url: string;
@@ -17,14 +17,13 @@ export interface PaginatedResponse<T> {
     to: number;
     total: number;
 }
-
-export interface LocalPagination<T> {
-    data: T[];
-    currentPage: number;
-    lastPage: number;
-    perPage: number;
-    total: number;
-    from: number;
-    to: number;
+export interface IPagination {
+  currentPage: number;
+  lastPage: number;
+  perPage: number;
+  total: number;
+  from: number;
+  to: number;
 }
+
 

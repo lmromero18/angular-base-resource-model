@@ -1,9 +1,9 @@
-export interface SelectOption {
+export interface ISelectOption {
     label: string;
     value: any;
 }
 
-export interface TableField {
+export interface ITableField {
     listable?: boolean;
     class?: string;
     width?: string;

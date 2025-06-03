@@ -19,22 +19,14 @@ export class ParametroSistemaComponent extends ControllerComponent<ParametroSist
     public authService: AuthService
   ) {
     super(injector, ParametroSistemaService);
+
+
+
   }
 
   ngOnInit(): void {
-    console.log(`[${new Date().toISOString()}] Iniciando petición de oficinas...`);
-    this.model.where('tx_oficina', '=', 'Sociedad de Corretaje Bicentenaria').getAll(
-      (data: any) => {
-        console.log(`[${new Date().toISOString()}] Respuesta de oficinas recibida`, data);
-      }
-    );
+    this.model.where('tx_oficina', '=', 'Sociedad de Corretaje Bicentenaria').getAll();
 
-    console.log(`[${new Date().toISOString()}] Iniciando petición de participantes...`);
-    this.model.new().from('v1/st_participante').getAll(
-      (data: any) => {
-        console.log(`[${new Date().toISOString()}] Respuesta de participantes recibida`, data);
-      }
-    );
   }
 
 

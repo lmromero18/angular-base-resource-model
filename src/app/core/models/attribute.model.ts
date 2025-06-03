@@ -1,4 +1,4 @@
-import { TableField } from './field-types';
+import { ITableField } from './field-types';
 import { ValidatorFn } from '@angular/forms';
 import { FormField } from './form-field.model';
 
@@ -6,14 +6,14 @@ export class Attribute {
     name!: string;
     label!: string;
     input?: FormField;
-    table?: TableField;
+    table?: ITableField;
     validators?: ValidatorFn[];
 
     constructor(config: {
         name: string;
         label: string;
         input?: FormField;
-        table?: TableField;
+        table?: ITableField;
     }) {
         this.name = config.name;
         this.label = config.label;

@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { catchError, tap, throwError } from 'rxjs';
 import { FormComponent } from '../../../components/form/form.component';
 import { ControllerComponent } from '../../../core/base/controller';
-import { AuthResponse } from '../../../core/models/auth.model';
+import { IAuthResponse } from '../../../core/models/auth.model';
 import { AuthService } from '../../../core/services/auth/auth.service';
 import { LoginService } from './login.service';
 
@@ -30,19 +30,19 @@ export class LoginComponent extends ControllerComponent<LoginService> {
    * @returns Observable con la respuesta del login
    */
   public submitFn = () =>
-    this.model.post<AuthResponse>().pipe(
-      tap((res) => {
+    this.model.post<IAuthResponse>(
+      (res) => {
         this.authService.savePayload(res);
         this.router.navigate(['/parametro-sistema']);
-      }),
-      catchError((err) => {
+      },
+      (err) => {
         console.error('❌ Error al iniciar sesión:', err);
-        return throwError(() => new Error('Error al iniciar sesión'));
-      })
+      }
     );
 
-    ngDoCheck(){      
-      console.log(this.model.getAttribute('username')?.input?.value);
-      console.log(this.model.getAttribute('password')?.input?.value);
-    }
+
+  ngDoCheck() {
+    console.log(this.model.getAttribute('username')?.input?.value);
+    console.log(this.model.getAttribute('password')?.input?.value);
+  }
 }

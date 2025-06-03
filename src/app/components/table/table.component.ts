@@ -1,7 +1,7 @@
 import { isPlatformBrowser, JsonPipe } from '@angular/common';
 import { afterRenderEffect, Component, Inject, Input, OnInit, PLATFORM_ID } from '@angular/core';
 import { Attribute } from '../../core/models/attribute.model';
-import { BaseResourceService } from '../../core/services/base-resource.service';
+import { BaseResourceService } from '../../core/services/base/base-resource.service';
 
 @Component({
     selector: 'app-table',
