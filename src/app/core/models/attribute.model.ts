@@ -28,6 +28,7 @@ export class Attribute {
                 visible: config.input.visible ?? true,
                 options: config.input.options,
                 setter: config.input.setter,
+                change: config.input.change,
                 validators: config.input.validators,
             }) : undefined;
 

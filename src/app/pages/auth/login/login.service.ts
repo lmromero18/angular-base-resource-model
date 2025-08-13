@@ -36,18 +36,21 @@ export class LoginService extends BaseResourceService {
       }),
     }),
     new Attribute({
-      name: 'tx_oficina',
-      label: 'Nombre de la Oficina',
+      name: 'co_serie',
+      label: 'Serie',
       input: new FormField({
         type: 'select',
         options: this.setSelectSource(
           'co_serie',
-          'co_oficina',
+          'co_serie',
           (model: BaseResourceService) => model.from('v1/prueba/oficina')
 
         ),
         required: true,
         class: 'col-span-12',
+        change: (value: any) => {
+          console.log('Selected Serie:', value);
+        }
       }),
     }),
   ];

@@ -11,6 +11,7 @@ export class FormField {
     visible?: boolean;
     options?: ModelSelectOption | ISelectOption[] | ((model: any) => ModelSelectOption[] | ISelectOption[]);
     setter?: (value: any) => string | HTMLElement;
+    change?: (value: any) => void;
     validators?: ValidatorFn[];
 
     private _value?: any;
@@ -24,6 +25,7 @@ export class FormField {
         visible?: boolean;
         options?: ModelSelectOption | ISelectOption[] | ((model: any) => ModelSelectOption[] | ISelectOption[]);
         setter?: (value: any) => string | HTMLElement;
+        change?: (value: any) => void;
         validators?: ValidatorFn[];
         value?: any;
     }) {
@@ -35,6 +37,7 @@ export class FormField {
         this.visible = config.visible;
         this.options = config.options;
         this.setter = config.setter;
+        this.change = config.change;
         this.validators = config.validators;
         this.value = config.value ?? null;
     }
@@ -58,6 +61,7 @@ export class FormField {
         // Escuchar cambios en el formulario
         control.valueChanges.subscribe((newVal) => {
             this._value = this.setter ? this.setter(newVal) : newVal;
+            this.change?.(this._value);
         });
 
         // Escuchar cambios externos (cuando alguien hace control['externalValue'] = ...)
