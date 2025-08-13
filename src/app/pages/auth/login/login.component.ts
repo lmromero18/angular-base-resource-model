@@ -24,6 +24,18 @@ export class LoginComponent extends ControllerComponent<LoginService> {
     super(injector, LoginService);
   }
 
+  ngOnInit() {
+    this.model.from('v1/prueba/oficina').getAll((res:any) => {
+      console.log('Fetched data:', res);
+    });
+     this.model.from('v1/prueba/oficina').getAll((res) => {
+      console.log('Fetched data:', res);
+    });
+     this.model.from('v1/prueba/oficina').getAll((res:any) => {
+      console.log('Fetched data:', res);
+    });
+  }
+
   /**
    * Realiza la solicitud de login al backend usando `model.create()`
    * y guarda el token si el login fue exitoso.
@@ -36,7 +48,7 @@ export class LoginComponent extends ControllerComponent<LoginService> {
         this.router.navigate(['/parametro-sistema']);
       },
       (err) => {
-        console.error('❌ Error al iniciar sesión:', err);
+        console.error('Error al iniciar sesión:', err);
       }
     );
 

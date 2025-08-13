@@ -41,7 +41,7 @@ export class LoginService extends BaseResourceService {
       input: new FormField({
         type: 'select',
         options: this.setSelectSource(
-          'nb_oficina',
+          'co_serie',
           'co_oficina',
           (model: BaseResourceService) => model.from('v1/prueba/oficina')
 
