@@ -358,8 +358,8 @@ export abstract class BaseResourceService<T = any> {
     */
     setCustomUrlType(urlType: string): this {
         this._customUrlType = urlType;
-        this.httpService.setUrlType('custom'); // Cambia al tipo 'custom' para usar la URL personalizada
-        this.httpService.setCustomUrl(urlType); // Establece la URL personalizada en el HttpResourceService
+        this.httpService.setUrlType('custom');
+        this.httpService.setCustomUrl(urlType);
         return this;
     }
 }
