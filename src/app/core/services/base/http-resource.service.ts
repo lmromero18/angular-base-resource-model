@@ -48,8 +48,6 @@ export class HttpResourceService<T = any> {
 
     getAll(endpoint: string, params: HttpParams | any = {}): Observable<IPaginatedResponse<T>> {
         const key = makeStateKey<T[]>(`${endpoint}-getAll`);
-        console.log(`${this.getBaseUrl()}/${endpoint}`);
-        
 
         return this.http.get<IPaginatedResponse<T>>(`${this.getBaseUrl()}/${endpoint}`, {
             ...this.buildHeaders(),
