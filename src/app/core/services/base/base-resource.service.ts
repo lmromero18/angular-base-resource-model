@@ -5,10 +5,7 @@ import { FormField } from '../../models/form-field.model';
 import { FormBuilderService } from './form-builder.service';
 import { HttpResourceService } from './http-resource.service';
 import { ModelSelectOption } from '../../models/select-option.model';
-import {
-  IBaseResponseList,
-  IPagination,
-} from '../../models/paginated-response.model';
+import { IPagination } from '../../models/paginated-response.model';
 import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 

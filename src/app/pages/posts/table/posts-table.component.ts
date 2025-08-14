@@ -23,6 +23,7 @@ export class PostsTableComponent
   ngOnInit(): void {
     this.model.getAll((posts: IPosts[]) => {
       console.log(posts);
+      console.log(this.model.pagination);
     });
   }
 

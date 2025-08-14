@@ -25,8 +25,3 @@ export interface IPagination {
   from: number;
   to: number;
 }
-
-export interface IBaseResponseList<TData> {
-  data: TData[];
-  pagination: IPagination;
-}
