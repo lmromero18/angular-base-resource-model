@@ -21,8 +21,6 @@ export const httpTransferStateInterceptor: HttpInterceptorFn = (req: HttpRequest
       const errorData = transferState.get(key, null);
       transferState.remove(key);
 
-      console.warn(`🚦 Request for ${req.url} was cancelled on client because it already failed on server.`);
-      
       return throwError(() => new HttpErrorResponse({
         status: errorData?.status,
         statusText: errorData?.message,
