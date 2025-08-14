@@ -8,48 +8,44 @@ import { ModelSelectOption } from '../../core/models/select-option.model';
 import { FormField } from '../../core/models/form-field.model';
 
 @Component({
-    selector: 'app-form',
-    standalone: true,
-    imports: [CommonModule, ReactiveFormsModule],
-    templateUrl: './form.component.html',
+  selector: 'app-form',
+  standalone: true,
+  imports: [CommonModule, ReactiveFormsModule],
+  templateUrl: './form.component.html',
 })
 export class FormComponent implements OnInit {
-    @Input() model!: BaseResourceService;
-    @Input() submitFn?: () => void;
-    @Output() submitted = new EventEmitter<void>();
+  @Input() model!: BaseResourceService;
+  @Input() customSubmit?: () => void;
+  @Output() submitted = new EventEmitter<void>();
 
-    form!: FormGroup;
-    fields!: Attribute[];
+  form!: FormGroup;
+  fields!: Attribute[];
 
-    ngOnInit(): void {
-        this.form = this.model.form;
-        this.fields = this.model.getFormAttributes();
+  ngOnInit(): void {
+    this.form = this.model.form;
+    this.fields = this.model.getFormAttributes();
 
-        let select = this.fields.find(attr => attr.input?.type === 'select');
+    let select = this.fields.find((attr) => attr.input?.type === 'select');
+  }
+
+  onSubmit() {
+    if (this.form.valid) {
+      const executeSubmit =
+        this.customSubmit ??
+        (() =>
+          this.model.post(
+            () => this.submitted.emit(),
+            (err) => console.error('Error en el submit:', err)
+          ));
+
+      executeSubmit();
+    } else {
+      this.form.markAllAsTouched();
+      console.warn('Formulario inválido');
     }
+  }
 
-    onSubmit() {
-        if (this.form.valid) {
-            const executeSubmit = this.submitFn ?? (() =>
-                this.model.post(
-                    () => this.submitted.emit(),
-                    (err) => console.error('Error en el submit:', err)
-                )
-            );
-
-            executeSubmit();
-
-        } else {
-            this.form.markAllAsTouched();
-            console.warn('Formulario inválido');
-        }
-    }
-
-
-    getSelectOptions(input: FormField): { label: string; value: any }[] {
-        return this.model.getSelectOptions(input);
-    }
-
-
+  getSelectOptions(input: FormField): { label: string; value: any }[] {
+    return this.model.getSelectOptions(input);
+  }
 }
-

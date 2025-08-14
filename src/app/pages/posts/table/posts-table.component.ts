@@ -4,24 +4,24 @@ import {
   Injector,
   OnInit,
 } from '@angular/core';
-import { ControllerComponent } from '../../core/base/controller';
-import { PostsService } from './posts.service';
-import { AuthService } from '../../core/services/auth/auth.service';
+import { ControllerComponent } from '../../../core/base/controller';
+import { PostsTableService } from './posts-table.service';
+import { AuthService } from '../../../core/services/auth/auth.service';
 import { ReactiveFormsModule } from '@angular/forms';
-import { TableComponent } from '../../components/table/table.component';
+import { TableComponent } from '../../../components/table/table.component';
 
 @Component({
   selector: 'app-posts',
-  templateUrl: './posts.component.html',
+  templateUrl: './posts-table.component.html',
   standalone: true,
   imports: [ReactiveFormsModule, TableComponent],
 })
-export class PostsComponent
-  extends ControllerComponent<PostsService>
+export class PostsTableComponent
+  extends ControllerComponent<PostsTableService>
   implements OnInit
 {
   constructor(injector: Injector, public authService: AuthService) {
-    super(injector, PostsService);
+    super(injector, PostsTableService);
   }
 
   ngOnInit(): void {

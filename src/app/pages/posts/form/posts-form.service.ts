@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Validators } from '@angular/forms';
-import { BaseResourceService } from '../../core/services/base/base-resource.service';
-import { Attribute } from '../../core/models/attribute.model';
-import { FormField } from '../../core/models/form-field.model';
+import { BaseResourceService } from '../../../core/services/base/base-resource.service';
+import { Attribute } from '../../../core/models/attribute.model';
+import { FormField } from '../../../core/models/form-field.model';
 
 @Injectable({
   providedIn: 'root',
 })
-export class PostsService extends BaseResourceService {
+export class PostsTableService extends BaseResourceService {
   override name = 'Posts';
   override endpoint = 'posts';
   override primaryKey = 'id';
@@ -17,7 +17,7 @@ export class PostsService extends BaseResourceService {
       name: 'id',
       label: 'ID',
       input: new FormField({
-        type: 'number',
+        type: 'hidden',
         required: true,
         class: 'col-span-12',
         validators: [Validators.required],

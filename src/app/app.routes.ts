@@ -25,7 +25,21 @@ export const routes: Routes = [
   {
     path: 'posts',
     canActivate: [authGuard],
-    loadComponent: () =>
-      import('./pages/posts/posts.component').then((m) => m.PostsComponent),
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./pages/posts/table/posts-table.component').then(
+            (m) => m.PostsTableComponent
+          ),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./pages/posts/form/posts-form.component').then(
+            (m) => m.PostsFormComponent
+          ),
+      },
+    ],
   },
 ];
