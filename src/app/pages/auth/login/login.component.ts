@@ -25,15 +25,17 @@ export class LoginComponent extends ControllerComponent<LoginService> {
   }
 
   ngOnInit() {
-    this.model.from('v1/prueba/oficina').getAll((res:any) => {
+
+    this.model.new().setCustomUrlType('https://jsonplaceholder.typicode.com').from('posts').getAll((res:any) => {
       console.log('Fetched data:', res);
     });
-     this.model.from('v1/prueba/oficina').getAll((res) => {
-      console.log('Fetched data:', res);
-    });
-     this.model.from('v1/prueba/oficina').getAll((res:any) => {
-      console.log('Fetched data:', res);
-    });
+
+    //  this.model.from('posts').getAll((res) => {
+    //   console.log('Fetched data:', res);
+    // });
+    //  this.model.from('posts').getAll((res:any) => {
+    //   console.log('Fetched data:', res);
+    // });
   }
 
   /**

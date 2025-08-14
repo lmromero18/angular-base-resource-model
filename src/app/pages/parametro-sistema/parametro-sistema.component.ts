@@ -19,9 +19,6 @@ export class ParametroSistemaComponent extends ControllerComponent<ParametroSist
     public authService: AuthService
   ) {
     super(injector, ParametroSistemaService);
-
-
-
   }
 
   ngOnInit(): void {
