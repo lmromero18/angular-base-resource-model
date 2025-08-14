@@ -221,7 +221,7 @@ export abstract class BaseResourceService<T = any> {
                 if (onSuccess) onSuccess(items);
             },
             error: (err) => {
-                console.error('Error fetching data:', err?.message || err);
+                // console.error('Error fetching data:', err?.message || err);
                 if (onError) onError(err);
             }
         });
