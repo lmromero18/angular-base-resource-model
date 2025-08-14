@@ -1,14 +1,10 @@
-import {
-  ChangeDetectionStrategy,
-  Component,
-  Injector,
-  OnInit,
-} from '@angular/core';
-import { ControllerComponent } from '../../../core/base/controller';
-import { PostsTableService } from './posts-table.service';
-import { AuthService } from '../../../core/services/auth/auth.service';
+import { Component, Injector, OnInit } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { TableComponent } from '../../../components/table/table.component';
+import { ControllerComponent } from '../../../core/base/controller';
+import { AuthService } from '../../../core/services/auth/auth.service';
+import { IPosts } from '../posts.types';
+import { PostsTableService } from './posts-table.service';
 
 @Component({
   selector: 'app-posts',
@@ -25,8 +21,8 @@ export class PostsTableComponent
   }
 
   ngOnInit(): void {
-    this.model.getAll((res: any) => {
-      console.log(res);
+    this.model.getAll((posts: IPosts[]) => {
+      console.log(posts);
     });
   }
 

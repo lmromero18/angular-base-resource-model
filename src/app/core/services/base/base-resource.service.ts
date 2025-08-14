@@ -5,7 +5,10 @@ import { FormField } from '../../models/form-field.model';
 import { FormBuilderService } from './form-builder.service';
 import { HttpResourceService } from './http-resource.service';
 import { ModelSelectOption } from '../../models/select-option.model';
-import { IPagination } from '../../models/paginated-response.model';
+import {
+  IBaseResponseList,
+  IPagination,
+} from '../../models/paginated-response.model';
 import { Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 
@@ -15,351 +18,356 @@ import { HttpParams } from '@angular/common/http';
  */
 @Injectable()
 export abstract class BaseResourceService<T = any> {
-    /** Nombre del recurso, utilizado como identificador lógico. */
-    abstract name: string;
+  /** Nombre del recurso, utilizado como identificador lógico. */
+  abstract name: string;
 
-    /** Endpoint de la API REST asociado a este recurso. */
-    abstract endpoint: string;
+  /** Endpoint de la API REST asociado a este recurso. */
+  abstract endpoint: string;
 
-    /** Clave primaria del recurso, usada para identificaciones únicas. */
-    abstract primaryKey: string;
+  /** Clave primaria del recurso, usada para identificaciones únicas. */
+  abstract primaryKey: string;
 
-    /** Lista de atributos que definen el recurso, incluyendo metadatos de formulario y tabla. */
-    abstract attributes: Attribute[];
+  /** Lista de atributos que definen el recurso, incluyendo metadatos de formulario y tabla. */
+  abstract attributes: Attribute[];
 
-    /** Información de paginación resultante de una petición getAll. */
-    public pagination: IPagination = {
-        currentPage: 1,
-        lastPage: 1,
-        perPage: 0,
-        total: 0,
-        from: 0,
-        to: 0,
-    };
+  /** Información de paginación resultante de una petición getAll. */
+  public pagination: IPagination = {
+    currentPage: 1,
+    lastPage: 1,
+    perPage: 0,
+    total: 0,
+    from: 0,
+    to: 0,
+  };
 
-    /** Tipo de URL personalizada para el modelo. */
-    private _customUrlType?: string;
+  /** Tipo de URL personalizada para el modelo. */
+  private _customUrlType?: string;
 
-    /** Formulario reactivo generado a partir de los atributos. */
-    public form!: FormGroup;
+  /** Formulario reactivo generado a partir de los atributos. */
+  public form!: FormGroup;
 
-    /** Arreglo de datos obtenidos desde la API. */
-    public items: T[] = [];
+  /** Arreglo de datos obtenidos desde la API. */
+  public items: T[] = [];
 
-    /** Parámetros usados para filtrar peticiones HTTP (e.g., filtros de tabla). */
-    public params: HttpParams = new HttpParams();
+  /** Parámetros usados para filtrar peticiones HTTP (e.g., filtros de tabla). */
+  public params: HttpParams = new HttpParams();
 
-    /** Endpoint personalizado alternativo (si se define con `from()`). */
-    private _customEndpoint?: string;
+  /** Endpoint personalizado alternativo (si se define con `from()`). */
+  private _customEndpoint?: string;
 
-    /** Inyección de dependencias comunes */
-    protected fb = inject(FormBuilder);
-    protected formService = inject(FormBuilderService);
-    protected httpService = inject(HttpResourceService<T>);
+  /** Inyección de dependencias comunes */
+  protected fb = inject(FormBuilder);
+  protected formService = inject(FormBuilderService);
+  protected httpService = inject(HttpResourceService<T>);
 
-    /** Modo de ejecución para peticiones: 'server' o 'client'. */
-    private _executionMode: 'server' | 'client' = 'server';
+  /** Modo de ejecución para peticiones: 'server' o 'client'. */
+  private _executionMode: 'server' | 'client' = 'server';
 
-    /**
-     * Inicializa el formulario principal del recurso.
-     * @param initialData Datos opcionales a precargar en el formulario.
-     */
-    initForm(initialData: Partial<T> = {}) {
-        this.form = this.formService.buildForm(this.attributes, initialData);
+  /**
+   * Inicializa el formulario principal del recurso.
+   * @param initialData Datos opcionales a precargar en el formulario.
+   */
+  initForm(initialData: Partial<T> = {}) {
+    this.form = this.formService.buildForm(this.attributes, initialData);
+  }
+
+  /**
+   * Crea y retorna un nuevo formulario reactivo.
+   * @param initialData Datos opcionales iniciales.
+   */
+  buildForm(initialData: Partial<T> = {}) {
+    return this.formService.buildForm(this.attributes, initialData);
+  }
+
+  /**
+   * Extrae los valores del formulario de acuerdo a los atributos definidos.
+   */
+  getValues(): Partial<T> {
+    return this.formService.extractFormValues(this.attributes, this.form);
+  }
+
+  /** Devuelve un atributo individual por su nombre. */
+  getAttribute(name: string): Attribute | undefined {
+    return this.attributes.find((a) => a.name === name);
+  }
+
+  /** Devuelve todos los atributos definidos del recurso. */
+  getAttributes(): Attribute[] {
+    return this.attributes;
+  }
+
+  /** Devuelve los atributos que tienen definido un input de formulario. */
+  getFormAttributes(): Attribute[] {
+    return this.attributes.filter((a) => a.input);
+  }
+
+  /** Devuelve los atributos que están marcados como listables en tabla. */
+  getListableAttributes(): Attribute[] {
+    return this.attributes.filter((a) => a.table?.listable);
+  }
+
+  /** Devuelve los inputs de formulario asociados a los atributos. */
+  getFormInputs(): FormField[] {
+    return this.getFormAttributes().map((a) => a.input!);
+  }
+
+  /**
+   * Devuelve las opciones disponibles para un input tipo select,
+   * resolviendo funciones o instancias de ModelSelectOption.
+   */
+  getSelectOptions(input: FormField): { label: string; value: any }[] {
+    const options = input.options;
+
+    if (!options) return [];
+
+    if (typeof options === 'function') {
+      const result = options(this);
+      return result instanceof ModelSelectOption
+        ? result.getOptionsAsArray()
+        : result;
     }
 
-    /**
-     * Crea y retorna un nuevo formulario reactivo.
-     * @param initialData Datos opcionales iniciales.
-     */
-    buildForm(initialData: Partial<T> = {}) {
-        return this.formService.buildForm(this.attributes, initialData);
+    if (options instanceof ModelSelectOption) {
+      return options.getOptionsAsArray();
     }
 
-    /**
-     * Extrae los valores del formulario de acuerdo a los atributos definidos.
-     */
-    getValues(): Partial<T> {
-        return this.formService.extractFormValues(this.attributes, this.form);
+    return options;
+  }
+
+  /**
+   * Crea un origen para un campo select a partir de datos precargados o remotos.
+   * @param label Propiedad o función que representa la etiqueta visible.
+   * @param value Propiedad o función que representa el valor del select.
+   * @param source Puede ser una función que llene los datos o un array fijo.
+   * @param filter Función opcional de filtrado dinámico.
+   */
+  setSelectSource(
+    label: ((item: any) => string) | string,
+    value: ((item: any) => any) | string,
+    source: ((model: BaseResourceService) => void) | any[],
+    filter?: CallableFunction
+  ): ModelSelectOption {
+    let model: BaseResourceService;
+
+    if (typeof source === 'function') {
+      model = this.new();
+      source(model);
+      model.paginate(0).getAll();
+    } else {
+      model = this.new();
+      model.items = source;
     }
 
-    /** Devuelve un atributo individual por su nombre. */
-    getAttribute(name: string): Attribute | undefined {
-        return this.attributes.find((a) => a.name === name);
-    }
+    return new ModelSelectOption(label, value, model, this, filter);
+  }
 
-    /** Devuelve todos los atributos definidos del recurso. */
-    getAttributes(): Attribute[] {
-        return this.attributes;
-    }
+  /**
+   * Establece un endpoint personalizado para las próximas peticiones.
+   */
+  from(endpoint: string): this {
+    this._customEndpoint = endpoint;
+    return this;
+  }
 
-    /** Devuelve los atributos que tienen definido un input de formulario. */
-    getFormAttributes(): Attribute[] {
-        return this.attributes.filter((a) => a.input);
-    }
+  /**
+   * Agrega un filtro tipo where al endpoint para consulta de datos.
+   */
+  where(
+    column: string,
+    operator: '=' | 'not' | 'between' | 'gte' | 'lte' | 'like',
+    value: string
+  ): this {
+    const suffix = operator === '=' ? '' : `_${operator}`;
+    this.params = this.params.set(`${column}${suffix}`, value);
+    return this;
+  }
 
-    /** Devuelve los atributos que están marcados como listables en tabla. */
-    getListableAttributes(): Attribute[] {
-        return this.attributes.filter((a) => a.table?.listable);
-    }
+  /**
+   * Crea una nueva instancia del servicio actual, con herencia de propiedades.
+   */
+  public new(): this {
+    const clone = Object.create(this);
+    return clone;
+  }
 
-    /** Devuelve los inputs de formulario asociados a los atributos. */
-    getFormInputs(): FormField[] {
-        return this.getFormAttributes().map((a) => a.input!);
-    }
+  /** Devuelve el modo actual de ejecución ('server' o 'client'). */
+  getExecutionMode(): 'server' | 'client' {
+    return this._executionMode;
+  }
 
-    /**
-     * Devuelve las opciones disponibles para un input tipo select,
-     * resolviendo funciones o instancias de ModelSelectOption.
-     */
-    getSelectOptions(input: FormField): { label: string; value: any }[] {
-        const options = input.options;
+  /**
+   * Define el modo de ejecución para futuras peticiones.
+   */
+  side(mode: 'server' | 'client'): this {
+    this._executionMode = mode;
+    this.httpService.setExecutionMode(mode);
+    return this;
+  }
 
-        if (!options) return [];
+  /**
+   * Obtiene todos los datos del recurso, aplicando los filtros y endpoint configurado.
+   * @param onSuccess Callback si se obtiene correctamente.
+   * @param onError Callback si hay error en la petición.
+   */
+  getAll(
+    onSuccess?: (data: T[]) => void,
+    onError?: (error: any) => void
+  ): void {
+    const endpoint = this._customEndpoint || this.endpoint;
 
-        if (typeof options === 'function') {
-            const result = options(this);
-            return result instanceof ModelSelectOption
-                ? result.getOptionsAsArray()
-                : result;
-        }
+    this.httpService.getAll(endpoint, this.params).subscribe({
+      next: (response) => {
+        const items = response?.data || response;
+        this.items = items;
+        this.pagination = {
+          currentPage: response?.current_page,
+          lastPage: response?.last_page,
+          perPage: response?.per_page,
+          total: response?.total,
+          from: response?.from,
+          to: response?.to,
+        };
 
-        if (options instanceof ModelSelectOption) {
-            return options.getOptionsAsArray();
-        }
+        if (onSuccess) onSuccess(items);
+      },
+      error: (err) => {
+        // console.error('Error fetching data:', err?.message || err);
+        if (onError) onError(err);
+      },
+    });
+  }
 
-        return options;
-    }
+  /** Elimina un recurso por su ID. */
+  delete(id: string | number) {
+    const endpoint = this._customEndpoint || this.endpoint;
+    return this.httpService.delete(endpoint, id);
+  }
 
-    /**
-     * Crea un origen para un campo select a partir de datos precargados o remotos.
-     * @param label Propiedad o función que representa la etiqueta visible.
-     * @param value Propiedad o función que representa el valor del select.
-     * @param source Puede ser una función que llene los datos o un array fijo.
-     * @param filter Función opcional de filtrado dinámico.
-     */
-    setSelectSource(
-        label: ((item: any) => string) | string,
-        value: ((item: any) => any) | string,
-        source: ((model: BaseResourceService) => void) | any[],
-        filter?: CallableFunction
-    ): ModelSelectOption {
-        let model: BaseResourceService;
+  /** Envía un POST con el payload del modelo y ejecuta los callbacks si se proporcionan */
+  post<R = T>(
+    onSuccess?: (data: R) => void,
+    onError?: (error: any) => void
+  ): void {
+    const endpoint = this._customEndpoint || this.endpoint;
+    const payload = this.getValues();
 
-        if (typeof source === 'function') {
-            model = this.new();
-            source(model);
-            model.paginate(0).getAll();
-        } else {
-            model = this.new();
-            model.items = source;
-        }
+    this.httpService.post<R>(endpoint, payload).subscribe({
+      next: (res) => {
+        if (onSuccess) onSuccess(res);
+      },
+      error: (err) => {
+        if (onError) onError(err);
+      },
+    });
+  }
 
-        return new ModelSelectOption(label, value, model, this, filter);
-    }
+  /** Actualiza un recurso existente por ID y maneja callbacks */
+  update<R = T>(
+    id: string | number,
+    onSuccess?: (data: R) => void,
+    onError?: (error: any) => void
+  ): void {
+    const endpoint = this._customEndpoint || this.endpoint;
 
-    /**
-     * Establece un endpoint personalizado para las próximas peticiones.
-     */
-    from(endpoint: string): this {
-        this._customEndpoint = endpoint;
-        return this;
-    }
+    this.httpService.put<R>(endpoint, id, this.getValues()).subscribe({
+      next: (res) => onSuccess?.(res),
+      error: (err) => onError?.(err),
+    });
+  }
 
-    /**
-     * Agrega un filtro tipo where al endpoint para consulta de datos.
-     */
-    where(column: string, operator: '=' | 'not' | 'between' | 'gte' | 'lte' | 'like', value: string): this {
-        const suffix = operator === '=' ? '' : `_${operator}`;
-        this.params = this.params.set(`${column}${suffix}`, value);
-        return this;
-    }
+  /** Obtiene un recurso por ID y maneja callbacks */
+  show<R = T>(
+    id: string | number,
+    onSuccess?: (data: R) => void,
+    onError?: (error: any) => void
+  ): void {
+    const endpoint = this._customEndpoint || this.endpoint;
 
-    /**
-     * Crea una nueva instancia del servicio actual, con herencia de propiedades.
-     */
-    public new(): this {
-        const clone = Object.create(this);
-        return clone;
-    }
+    this.httpService.show<R>(endpoint, id).subscribe({
+      next: (res) => onSuccess?.(res),
+      error: (err) => onError?.(err),
+    });
+  }
 
-    /** Devuelve el modo actual de ejecución ('server' o 'client'). */
-    getExecutionMode(): 'server' | 'client' {
-        return this._executionMode;
-    }
+  /**
+   * Paginación de resultados, estableciendo el número de elementos por página y la página actual.
+   * @param perPage Número de elementos por página.
+   * @param page Página actual (por defecto es 1).
+   */
 
-    /**
-     * Define el modo de ejecución para futuras peticiones.
-     */
-    side(mode: 'server' | 'client'): this {
-        this._executionMode = mode;
-        this.httpService.setExecutionMode(mode);
-        return this;
-    }
+  public paginate(perPage: number, page: number = 1): this {
+    this.params = this.params?.set('per_page', perPage?.toString());
+    this.params = this.params?.set('page', page?.toString());
 
-    /**
-     * Obtiene todos los datos del recurso, aplicando los filtros y endpoint configurado.
-     * @param onSuccess Callback si se obtiene correctamente.
-     * @param onError Callback si hay error en la petición.
-     */
-    getAll(onSuccess?: (data: T[]) => void, onError?: (error: any) => void): void {
-        const endpoint = this._customEndpoint || this.endpoint;
+    return this;
+  }
 
-        this.httpService.getAll(endpoint, this.params).subscribe({
-            next: (response) => {
-                const items = response?.data || response;
-                this.items = items;
-                this.pagination = {
-                    currentPage: response?.current_page,
-                    lastPage: response?.last_page,
-                    perPage: response?.per_page,
-                    total: response?.total,
-                    from: response?.from,
-                    to: response?.to,
-                };
+  /**
+   * Establece la página actual para la paginación.
+   * @param perPage Número de elementos por página (por defecto es 1).
+   */
 
-                if (onSuccess) onSuccess(items);
-            },
-            error: (err) => {
-                // console.error('Error fetching data:', err?.message || err);
-                if (onError) onError(err);
-            }
-        });
-    }
+  public setPage(perPage: number = 1) {
+    this.params = this.params?.set('page', perPage?.toString());
 
-    /** Elimina un recurso por su ID. */
-    delete(id: string | number) {
-        const endpoint = this._customEndpoint || this.endpoint;
-        return this.httpService.delete(endpoint, id);
-    }
+    return this;
+  }
 
-    /** Envía un POST con el payload del modelo y ejecuta los callbacks si se proporcionan */
-    post<R = T>(
-        onSuccess?: (data: R) => void,
-        onError?: (error: any) => void
-    ): void {
-        const endpoint = this._customEndpoint || this.endpoint;
-        const payload = this.getValues();
+  /**
+   * Obtiene el número de la página actual de los parámetros de paginación.
+   * Si no se ha establecido, devuelve 1 por defecto.
+   */
 
-        this.httpService.post<R>(endpoint, payload).subscribe({
-            next: (res) => {
-                if (onSuccess) onSuccess(res);
-            },
-            error: (err) => {
-                if (onError) onError(err);
-            }
-        });
-    }
+  public getPage(): number {
+    return parseInt(this.params?.get('page') || '');
+  }
 
+  /**
+   * Establece el número de elementos por página para la paginación.
+   * @param page Número de elementos por página.
+   */
 
-    /** Actualiza un recurso existente por ID y maneja callbacks */
-    update<R = T>(
-        id: string | number,
-        onSuccess?: (data: R) => void,
-        onError?: (error: any) => void
-    ): void {
-        const endpoint = this._customEndpoint || this.endpoint;
+  public setPerPage(page: number) {
+    this.params = this.params?.set('per_page', page.toString());
 
-        this.httpService.put<R>(endpoint, id, this.getValues()).subscribe({
-            next: (res) => onSuccess?.(res),
-            error: (err) => onError?.(err),
-        });
-    }
+    return this;
+  }
 
+  /**
+   * Obtiene el número de elementos por página de los parámetros de paginación.
+   * Si no se ha establecido, devuelve 0 por defecto.
+   */
 
-    /** Obtiene un recurso por ID y maneja callbacks */
-    show<R = T>(
-        id: string | number,
-        onSuccess?: (data: R) => void,
-        onError?: (error: any) => void
-    ): void {
-        const endpoint = this._customEndpoint || this.endpoint;
+  public getPerPage(): number {
+    return parseInt(this.params?.get('per_page') || '');
+  }
 
-        this.httpService.show<R>(endpoint, id).subscribe({
-            next: (res) => onSuccess?.(res),
-            error: (err) => onError?.(err),
-        });
-    }
+  /**
+   * Establece los parámetros HTTP para las peticiones.
+   * @param params Parámetros a establecer.
+   */
 
-    /**
-     * Paginación de resultados, estableciendo el número de elementos por página y la página actual.
-     * @param perPage Número de elementos por página.
-     * @param page Página actual (por defecto es 1).
-     */
+  setParams(params: HttpParams): this {
+    this.params = params;
+    return this;
+  }
 
-    public paginate(perPage: number, page: number = 1): this {
-        this.params = this.params?.set("per_page", perPage?.toString());
-        this.params = this.params?.set("page", page?.toString());
+  /**
+   * Obtiene los parámetros HTTP actuales.
+   * Si no se han establecido, devuelve un nuevo HttpParams vacío.
+   */
 
-        return this;
-    }
+  getParams(): HttpParams {
+    return this.params ?? new HttpParams();
+  }
 
-    /**
-     * Establece la página actual para la paginación.
-     * @param perPage Número de elementos por página (por defecto es 1).
-     */
-
-    public setPage(perPage: number = 1) {
-        this.params = this.params?.set("page", perPage?.toString());
-
-        return this;
-    }
-
-    /**
-     * Obtiene el número de la página actual de los parámetros de paginación.
-     * Si no se ha establecido, devuelve 1 por defecto.
-     */
-
-    public getPage(): number {
-        return parseInt(this.params?.get("page") || "");
-    }
-
-    /**
-     * Establece el número de elementos por página para la paginación.
-     * @param page Número de elementos por página.
-     */
-
-    public setPerPage(page: number) {
-        this.params = this.params?.set("per_page", page.toString());
-
-        return this;
-    }
-
-    /**
-     * Obtiene el número de elementos por página de los parámetros de paginación.
-     * Si no se ha establecido, devuelve 0 por defecto.
-     */
-
-    public getPerPage(): number {
-        return parseInt(this.params?.get("per_page") || "");
-    }
-
-    /**
-     * Establece los parámetros HTTP para las peticiones.
-     * @param params Parámetros a establecer.
-     */
-
-    setParams(params: HttpParams): this {
-        this.params = params;
-        return this;
-    }
-
-    /**
-     * Obtiene los parámetros HTTP actuales.
-     * Si no se han establecido, devuelve un nuevo HttpParams vacío.
-     */
-
-    getParams(): HttpParams {
-        return this.params ?? new HttpParams();
-    }
-
-    /**
-    * Establece un tipo de URL personalizada para el modelo.
-    */
-    setCustomUrl(urlType: string): this {
-        this._customUrlType = urlType;
-        this.httpService.setUrlType('custom');
-        this.httpService.setCustomUrl(urlType);
-        return this;
-    }
+  /**
+   * Establece un tipo de URL personalizada para el modelo.
+   */
+  setCustomUrl(urlType: string): this {
+    this._customUrlType = urlType;
+    this.httpService.setUrlType('custom');
+    this.httpService.setCustomUrl(urlType);
+    return this;
+  }
 }

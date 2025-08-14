@@ -16,32 +16,14 @@ export class PostsTableService extends BaseResourceService {
     new Attribute({
       name: 'id',
       label: 'ID',
-      input: new FormField({
-        type: 'number',
-        required: true,
-        class: 'col-span-12',
-        validators: [Validators.required],
-      }),
     }),
     new Attribute({
       name: 'title',
       label: 'Title',
-      input: new FormField({
-        type: 'text',
-        required: true,
-        class: 'col-span-12',
-        validators: [Validators.required],
-      }),
     }),
     new Attribute({
       name: 'content',
       label: 'Content',
-      input: new FormField({
-        type: 'text',
-        required: true,
-        class: 'col-span-12',
-        validators: [Validators.required],
-      }),
     }),
   ];
 }

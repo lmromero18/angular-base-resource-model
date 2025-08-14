@@ -19,11 +19,7 @@ export class PostsFormComponent
     super(injector, PostsTableService);
   }
 
-  ngOnInit(): void {
-    this.model.getAll((res: any) => {
-      console.log(res);
-    });
-  }
+  ngOnInit(): void {}
 
   ngDoCheck(): void {}
 }
