@@ -16,9 +16,8 @@ export abstract class ControllerComponent<T extends BaseResourceService> {
     this.model.initForm();
   }
 
-  initForm(initialData: any = {}, query: CallableFunction): void {
+  initForm(initialData: any = {}): void {
     this._form = this.model.buildForm(initialData);
-
   }
 
   queryRoute(query: CallableFunction): void {
