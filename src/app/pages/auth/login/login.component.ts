@@ -1,7 +1,6 @@
-import { Component, inject, Injector, REQUEST } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, tap, throwError } from 'rxjs';
 import { FormComponent } from '../../../components/form/form.component';
 import { ControllerComponent } from '../../../core/base/controller';
 import { IAuthResponse } from '../../../core/models/auth.model';
@@ -15,7 +14,6 @@ import { LoginService } from './login.service';
   imports: [FormComponent, ReactiveFormsModule],
 })
 export class LoginComponent extends ControllerComponent<LoginService> {
-
   constructor(
     injector: Injector,
     public authService: AuthService,
@@ -43,7 +41,7 @@ export class LoginComponent extends ControllerComponent<LoginService> {
    * y guarda el token si el login fue exitoso.
    * @returns Observable con la respuesta del login
    */
-  public submitFn = () =>
+  public customSubmit = () =>
     this.model.post<IAuthResponse>(
       (res) => {
         this.authService.savePayload(res);
@@ -53,7 +51,6 @@ export class LoginComponent extends ControllerComponent<LoginService> {
         console.error('Error al iniciar sesión:', err);
       }
     );
-
 
   ngDoCheck() {
     console.log(this.model.getAttribute('username')?.input?.value);
