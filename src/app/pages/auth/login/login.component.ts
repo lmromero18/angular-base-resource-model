@@ -26,7 +26,7 @@ export class LoginComponent extends ControllerComponent<LoginService> {
 
   ngOnInit() {
 
-    this.model.new().getAll((res:any) => {
+    this.model.new().setCustomUrl('https://jsonplaceholder.typicode.com').from('posts').getAll((res:any) => {
       console.log('Fetched data:', res);
     });
 

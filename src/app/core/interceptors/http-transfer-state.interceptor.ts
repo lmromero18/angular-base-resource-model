@@ -1,4 +1,3 @@
-// http-transfer-state.interceptor.ts
 import {
   HttpInterceptorFn,
   HttpRequest,
