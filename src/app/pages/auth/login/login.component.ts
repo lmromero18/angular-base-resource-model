@@ -1,7 +1,6 @@
-import { Component, inject, Injector, REQUEST } from '@angular/core';
+import { Component, Injector } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { catchError, tap, throwError } from 'rxjs';
 import { FormComponent } from '../../../components/form/form.component';
 import { ControllerComponent } from '../../../core/base/controller';
 import { IAuthResponse } from '../../../core/models/auth.model';
@@ -24,7 +23,8 @@ export class LoginComponent extends ControllerComponent<LoginService> {
   }
 
   ngOnInit() {
-    this.model.new().getAll((res: any) => {
+
+    this.model.new().setCustomUrl('https://jsonplaceholder.typicode.com').from('posts').getAll((res:any) => {
       console.log('Fetched data:', res);
     });
 
