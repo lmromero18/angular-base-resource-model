@@ -1,34 +1,27 @@
-import {
-  HttpInterceptorFn,
-  HttpRequest,
-  HttpHandlerFn,
-  HttpErrorResponse
-} from '@angular/common/http';
-import { inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { isPlatformBrowser } from '@angular/common';
-import { PLATFORM_ID } from '@angular/core';
+// http-error.interceptor.ts
+import { HttpErrorResponse, HttpHandlerFn, HttpInterceptorFn, HttpRequest } from '@angular/common/http';
+import { inject, PLATFORM_ID, makeStateKey, TransferState } from '@angular/core';
+import { /* ... */ } from '@angular/router';
+import { isPlatformServer } from '@angular/common';
 import { catchError, throwError } from 'rxjs';
 
-export const httpErrorInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
-  const router = inject(Router);
-  const platformId = inject(PLATFORM_ID);
-  const isBrowser = isPlatformBrowser(platformId);
+export interface ErrorState {
+  status: number;
+  message: string;
+}
 
+export const httpErrorInterceptor: HttpInterceptorFn = (req: HttpRequest<any>, next: HttpHandlerFn) => {
+  const platformId = inject(PLATFORM_ID);
+  const transferState = inject(TransferState);
+  
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      const message =
-        error.error?.message ||
-        error.statusText ||
-        'Unexpected error occurred';
-
-      if (error.status === 401 && isBrowser) {
-        console.warn('🔒 Unauthorized - redirecting to /Ingresar');
-        router.navigate(['/Ingresar']);
-      } else if (isBrowser) {
-        alert(`HTTP Error ${error.status}: ${message}`);
+      if (isPlatformServer(platformId)) {
+        const key = makeStateKey<ErrorState>('error-' + req.url); 
+        
+        transferState.set(key, { status: error.status, message: error.message });
+        console.error(`SSR Error for ${req.urlWithParams}:`, error.message);
       }
-
       return throwError(() => error);
     })
   );

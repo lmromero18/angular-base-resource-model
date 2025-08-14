@@ -37,6 +37,8 @@ export abstract class BaseResourceService<T = any> {
         to: 0,
     };
 
+    /** Tipo de URL personalizada para el modelo. */
+    private _customUrlType?: string;
 
     /** Formulario reactivo generado a partir de los atributos. */
     public form!: FormGroup;
@@ -205,20 +207,21 @@ export abstract class BaseResourceService<T = any> {
 
         this.httpService.getAll(endpoint, this.params).subscribe({
             next: (response) => {
-                this.items = response.data;
+                const items = response?.data || response;
+                this.items = items;
                 this.pagination = {
-                    currentPage: response.current_page,
-                    lastPage: response.last_page,
-                    perPage: response.per_page,
-                    total: response.total,
-                    from: response.from,
-                    to: response.to,
+                    currentPage: response?.current_page,
+                    lastPage: response?.last_page,
+                    perPage: response?.per_page,
+                    total: response?.total,
+                    from: response?.from,
+                    to: response?.to,
                 };
 
-                if (onSuccess) onSuccess(response.data);
+                if (onSuccess) onSuccess(items);
             },
             error: (err) => {
-                console.error('Error fetching data:', err?.message || err);
+                // console.error('Error fetching data:', err?.message || err);
                 if (onError) onError(err);
             }
         });
@@ -348,5 +351,15 @@ export abstract class BaseResourceService<T = any> {
 
     getParams(): HttpParams {
         return this.params ?? new HttpParams();
+    }
+
+    /**
+    * Establece un tipo de URL personalizada para el modelo.
+    */
+    setCustomUrl(urlType: string): this {
+        this._customUrlType = urlType;
+        this.httpService.setUrlType('custom');
+        this.httpService.setCustomUrl(urlType);
+        return this;
     }
 }
