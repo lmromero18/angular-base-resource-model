@@ -52,6 +52,9 @@ export abstract class BaseResourceService<T = any> {
     /** Endpoint personalizado alternativo (si se define con `from()`). */
     private _customEndpoint?: string;
 
+    /** Indica si el formulario está en modo de visualización. */
+    public isShow = false;
+
     /** Inyección de dependencias comunes */
     protected fb = inject(FormBuilder);
     protected formService = inject(FormBuilderService);

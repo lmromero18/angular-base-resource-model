@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 export abstract class ControllerComponent<T extends BaseResourceService> {
   protected _form!: FormGroup;
   public model: T;
+  public isShow: boolean = false;
 
   constructor(
     protected injector: Injector,
@@ -27,18 +28,15 @@ export abstract class ControllerComponent<T extends BaseResourceService> {
 
       if (id) {
         query(id);
-        // Se valida si el componente es un detalle para deshabilitar todos los inputs
         this.injector.get(ActivatedRoute).data.subscribe((data) => {
-          // this.isShow = data["isShow"];
+          this.isShow = data["isShow"];
 
-          // this.model.isShow = this.isShow ?? false;
-          // if (data["isShow"]) {
-          //   this.model.attributes.map((attr) => {
-          //     if (attr.input) {
-          //       attr.input.disabled = true;
-          //     }
-          //   });
-          // }
+          this.model.isShow = this.isShow ?? false;
+          if (data["isShow"]) {
+            this.form.disable();
+          } else {
+            this.form.enable();
+          }
         });
       }
     });
