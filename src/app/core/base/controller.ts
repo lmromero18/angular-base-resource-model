@@ -13,7 +13,7 @@ export abstract class ControllerComponent<T extends BaseResourceService> {
     protected modelClass: Type<T>,
   ) {
     this.model = this.injector.get(modelClass);
-    this.model.buildForm();
+    this.model.initForm();
   }
 
   initForm(initialData: any = {}): void {
