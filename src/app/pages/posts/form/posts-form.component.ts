@@ -15,11 +15,18 @@ export class PostsFormComponent
   extends ControllerComponent<PostsTableService>
   implements OnInit
 {
-  constructor(injector: Injector, public authService: AuthService) {
+  constructor(
+    injector: Injector,
+    public authService: AuthService,
+  ) {
     super(injector, PostsTableService);
   }
 
-  ngOnInit(): void {}
-
-  ngDoCheck(): void {}
+  ngOnInit(): void {
+    this.queryRoute((id: string) => {
+      this.model.show(id, (data) => {
+        console.log(data);
+      });
+    });
+  }
 }

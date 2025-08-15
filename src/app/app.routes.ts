@@ -11,7 +11,7 @@ export const routes: Routes = [
     path: 'Ingresar',
     loadComponent: () =>
       import('./pages/auth/login/login.component').then(
-        (m) => m.LoginComponent
+        (m) => m.LoginComponent,
       ),
   },
   {
@@ -19,7 +19,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./pages/parametro-sistema/parametro-sistema.component').then(
-        (m) => m.ParametroSistemaComponent
+        (m) => m.ParametroSistemaComponent,
       ),
   },
   {
@@ -30,14 +30,21 @@ export const routes: Routes = [
         path: '',
         loadComponent: () =>
           import('./pages/posts/table/posts-table.component').then(
-            (m) => m.PostsTableComponent
+            (m) => m.PostsTableComponent,
+          ),
+      },
+      {
+        path: 'crear',
+        loadComponent: () =>
+          import('./pages/posts/form/posts-form.component').then(
+            (m) => m.PostsFormComponent,
           ),
       },
       {
         path: ':id',
         loadComponent: () =>
           import('./pages/posts/form/posts-form.component').then(
-            (m) => m.PostsFormComponent
+            (m) => m.PostsFormComponent,
           ),
       },
     ],

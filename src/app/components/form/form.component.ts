@@ -35,7 +35,7 @@ export class FormComponent implements OnInit {
         (() =>
           this.model.post(
             () => this.submitted.emit(),
-            (err) => console.error('Error en el submit:', err)
+            (err) => console.error('Error en el submit:', err),
           ));
 
       executeSubmit();

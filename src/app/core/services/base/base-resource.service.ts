@@ -55,7 +55,14 @@ export abstract class BaseResourceService<T = any> {
   /** Indica si el formulario está en modo de visualización. */
   public isShow = false;
 
+  /** Indica si el modelo está en modo de carga. */
   public isLoading = false;
+
+  /** Indica si el modelo está en modo de creación. */
+  public isNew = true;
+
+  /** Valor de la clave primaria del modelo. */
+  public primaryKeyValue: string | number | null = null;
 
   /** Inyección de dependencias comunes */
   protected fb = inject(FormBuilder);
@@ -299,6 +306,25 @@ export abstract class BaseResourceService<T = any> {
       });
   }
 
+  public initModel(model: this, values: any, pk: any) {
+    model.isNew = false;
+    model.primaryKeyValue = pk;
+
+    for (const column in values) {
+      model.setAttributeValue(column, values[column]);
+    }
+  }
+
+  protected setAttributeValue(name: string, value: any) {
+    const attr = this.attributes.find((item: any) => item.name === name);
+    if (attr?.table) {
+      attr.table.value = value;
+    }
+    if (attr?.input) {
+      attr.input.bindForm(attr.name, this.form, value);
+    }
+  }
+
   /** Obtiene un recurso por ID y maneja callbacks */
   show<R = T>(
     id: string | number,
@@ -316,7 +342,10 @@ export abstract class BaseResourceService<T = any> {
         }),
       )
       .subscribe({
-        next: (res) => onSuccess?.(res),
+        next: (res) => {
+          this.initModel(this, res, id);
+          onSuccess?.(res);
+        },
         error: (err) => onError?.(err),
       });
   }

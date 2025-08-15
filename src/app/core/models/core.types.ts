@@ -22,4 +22,5 @@ export interface ITableField {
   sortable?: boolean;
   filterable?: boolean;
   formatter?: (row: any) => string;
+  value?: any;
 }

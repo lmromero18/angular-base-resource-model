@@ -57,12 +57,12 @@ export class FormField {
     this._value = val;
   }
 
-  bindForm(name: string, form: FormGroup): void {
+  bindForm(name: string, form: FormGroup, value?: any): void {
     const control = form.get(name);
     if (!control) return;
 
     // Si el control ya tiene un valor, lo aplicamos usando el setter si existe
-    const initialValue = control.value;
+    const initialValue = value ?? control.value;
     this._value = this.setter ? this.setter(initialValue) : initialValue;
 
     // Escuchar cambios en el formulario
@@ -72,12 +72,14 @@ export class FormField {
     });
 
     // Escuchar cambios externos (cuando alguien hace control['externalValue'] = ...)
-    Object.defineProperty(control, 'externalValue', {
-      set: (val: any) => {
-        this._value = this.setter ? this.setter(val) : val;
-        control.setValue(val);
-      },
-      get: () => this._value,
-    });
+    if (!Object.prototype.hasOwnProperty.call(control, 'externalValue')) {
+      Object.defineProperty(control, 'externalValue', {
+        set: (val: any) => {
+          this._value = this.setter ? this.setter(val) : val;
+          control.setValue(val);
+        },
+        get: () => this._value,
+      });
+    }
   }
 }

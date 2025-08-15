@@ -10,7 +10,7 @@ export abstract class ControllerComponent<T extends BaseResourceService> {
 
   constructor(
     protected injector: Injector,
-    protected modelClass: Type<T>
+    protected modelClass: Type<T>,
   ) {
     this.model = this.injector.get(modelClass);
     this.model.initForm();
@@ -21,29 +21,26 @@ export abstract class ControllerComponent<T extends BaseResourceService> {
   }
 
   queryRoute(query: CallableFunction): void {
-
     this.injector.get(ActivatedRoute).params.subscribe((params) => {
-      const id = params["id"];
+      const id = params['id'];
 
       if (id) {
         query(id);
         this.injector.get(ActivatedRoute).data.subscribe((data) => {
-          this.isShow = data["isShow"];
+          this.isShow = data['isShow'];
 
           this.model.isShow = this.isShow ?? false;
-          if (data["isShow"]) {
-            this.form.disable();
-          } else {
-            this.form.enable();
+          if (data['isShow']) {
+            this.model.attributes.map((attr) => {
+              if (attr.input) {
+                attr.input.disabled = true;
+              }
+            });
           }
         });
       }
     });
   }
-
-
-
-
 
   get form(): FormGroup {
     return this._form;

@@ -38,6 +38,7 @@ export class Attribute {
       class: config.table?.class ?? 'text-left',
       width: config.table?.width ?? 'auto',
       align: config.table?.align ?? 'left',
+      value: config.table?.value ?? null,
       ...config.table,
     };
   }
