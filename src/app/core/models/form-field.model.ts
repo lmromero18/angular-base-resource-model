@@ -71,15 +71,8 @@ export class FormField {
       this.change?.(this._value);
     });
 
-    // Escuchar cambios externos (cuando alguien hace control['externalValue'] = ...)
-    if (!Object.prototype.hasOwnProperty.call(control, 'externalValue')) {
-      Object.defineProperty(control, 'externalValue', {
-        set: (val: any) => {
-          this._value = this.setter ? this.setter(val) : val;
-          control.setValue(val);
-        },
-        get: () => this._value,
-      });
-    }
+    // Inicializar el valor del control
+    this._value = this.setter ? this.setter(initialValue) : initialValue;
+    control.setValue(this._value);
   }
 }
