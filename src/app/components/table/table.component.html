@@ -19,6 +19,12 @@
           }
         </tr>
       }
+    } @else if (model.isLoading) {
+      <tr>
+        <td [attr.colspan]="columns.length" class="text-center p-4">
+          Cargando...
+        </td>
+      </tr>
     } @else {
       <tr>
         <td [attr.colspan]="columns.length" class="text-center p-4">

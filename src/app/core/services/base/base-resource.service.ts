@@ -6,7 +6,7 @@ import { FormBuilderService } from './form-builder.service';
 import { HttpResourceService } from './http-resource.service';
 import { ModelSelectOption } from '../../models/select-option.model';
 import { IPagination } from '../../models/paginated-response.model';
-import { Observable } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
 import { HttpParams } from '@angular/common/http';
 
 /**
@@ -54,6 +54,8 @@ export abstract class BaseResourceService<T = any> {
 
   /** Indica si el formulario está en modo de visualización. */
   public isShow = false;
+
+  public isLoading = false;
 
   /** Inyección de dependencias comunes */
   protected fb = inject(FormBuilder);
@@ -145,7 +147,7 @@ export abstract class BaseResourceService<T = any> {
     label: ((item: any) => string) | string,
     value: ((item: any) => any) | string,
     source: ((model: BaseResourceService) => void) | any[],
-    filter?: CallableFunction
+    filter?: CallableFunction,
   ): ModelSelectOption {
     let model: BaseResourceService;
 
@@ -175,7 +177,7 @@ export abstract class BaseResourceService<T = any> {
   where(
     column: string,
     operator: '=' | 'not' | 'between' | 'gte' | 'lte' | 'like',
-    value: string
+    value: string,
   ): this {
     const suffix = operator === '=' ? '' : `_${operator}`;
     this.params = this.params.set(`${column}${suffix}`, value);
@@ -211,30 +213,36 @@ export abstract class BaseResourceService<T = any> {
    */
   getAll(
     onSuccess?: (data: T[]) => void,
-    onError?: (error: any) => void
+    onError?: (error: any) => void,
   ): void {
+    this.isLoading = true;
     const endpoint = this._customEndpoint || this.endpoint;
-
-    this.httpService.getAll(endpoint, this.params).subscribe({
-      next: (response) => {
-        const items = response?.data || response;
-        this.items = items;
-        this.pagination = {
-          currentPage: response?.current_page,
-          lastPage: response?.last_page,
-          perPage: response?.per_page,
-          total: response?.total,
-          from: response?.from,
-          to: response?.to,
-        };
-
-        if (onSuccess) onSuccess(items);
-      },
-      error: (err) => {
-        // console.error('Error fetching data:', err?.message || err);
-        if (onError) onError(err);
-      },
-    });
+    this.httpService
+      .getAll(endpoint, this.params)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          const items = response?.data || response;
+          this.items = items;
+          this.pagination = {
+            currentPage: response?.current_page,
+            lastPage: response?.last_page,
+            perPage: response?.per_page,
+            total: response?.total,
+            from: response?.from,
+            to: response?.to,
+          };
+          if (onSuccess) onSuccess(items);
+        },
+        error: (err) => {
+          // console.error('Error fetching data:', err?.message || err);
+          if (onError) onError(err);
+        },
+      });
   }
 
   /** Elimina un recurso por su ID. */
@@ -246,47 +254,71 @@ export abstract class BaseResourceService<T = any> {
   /** Envía un POST con el payload del modelo y ejecuta los callbacks si se proporcionan */
   post<R = T>(
     onSuccess?: (data: R) => void,
-    onError?: (error: any) => void
+    onError?: (error: any) => void,
   ): void {
+    this.isLoading = true;
     const endpoint = this._customEndpoint || this.endpoint;
     const payload = this.getValues();
 
-    this.httpService.post<R>(endpoint, payload).subscribe({
-      next: (res) => {
-        if (onSuccess) onSuccess(res);
-      },
-      error: (err) => {
-        if (onError) onError(err);
-      },
-    });
+    this.httpService
+      .post<R>(endpoint, payload)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          if (onSuccess) onSuccess(res);
+        },
+        error: (err) => {
+          if (onError) onError(err);
+        },
+      });
   }
 
   /** Actualiza un recurso existente por ID y maneja callbacks */
   update<R = T>(
     id: string | number,
     onSuccess?: (data: R) => void,
-    onError?: (error: any) => void
+    onError?: (error: any) => void,
   ): void {
+    this.isLoading = true;
     const endpoint = this._customEndpoint || this.endpoint;
 
-    this.httpService.put<R>(endpoint, id, this.getValues()).subscribe({
-      next: (res) => onSuccess?.(res),
-      error: (err) => onError?.(err),
-    });
+    this.httpService
+      .put<R>(endpoint, id, this.getValues())
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => onSuccess?.(res),
+        error: (err) => onError?.(err),
+      });
   }
 
   /** Obtiene un recurso por ID y maneja callbacks */
   show<R = T>(
     id: string | number,
     onSuccess?: (data: R) => void,
-    onError?: (error: any) => void
+    onError?: (error: any) => void,
   ): void {
+    this.isLoading = true;
     const endpoint = this._customEndpoint || this.endpoint;
 
-    this.httpService.show<R>(endpoint, id).subscribe({
-      next: (res) => onSuccess?.(res),
-      error: (err) => onError?.(err),
-    });
+    this.httpService
+      .show<R>(endpoint, id)
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (res) => onSuccess?.(res),
+        error: (err) => onError?.(err),
+      });
   }
 
   /**
@@ -295,7 +327,7 @@ export abstract class BaseResourceService<T = any> {
    * @param page Página actual (por defecto es 1).
    */
 
-  public paginate(perPage: number, page: number = 1): this {
+  public paginate(perPage: number, page = 1): this {
     this.params = this.params?.set('per_page', perPage?.toString());
     this.params = this.params?.set('page', page?.toString());
 
@@ -307,7 +339,7 @@ export abstract class BaseResourceService<T = any> {
    * @param perPage Número de elementos por página (por defecto es 1).
    */
 
-  public setPage(perPage: number = 1) {
+  public setPage(perPage = 1) {
     this.params = this.params?.set('page', perPage?.toString());
 
     return this;
