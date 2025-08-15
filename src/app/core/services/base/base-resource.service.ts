@@ -72,10 +72,6 @@ export abstract class BaseResourceService<T = any> {
   /** Modo de ejecución para peticiones: 'server' o 'client'. */
   private _executionMode: 'server' | 'client' = 'server';
 
-  initForm(initialData: Partial<T> = {}) {
-    this.form = this.formService.buildForm(this.attributes, initialData);
-  }
-
   /**
    * Inicializa el formulario principal del recurso.
    * @param iniDatos opcionales iniciales.

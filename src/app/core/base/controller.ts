@@ -13,11 +13,12 @@ export abstract class ControllerComponent<T extends BaseResourceService> {
     protected modelClass: Type<T>,
   ) {
     this.model = this.injector.get(modelClass);
-    this.model.initForm();
+    this.initForm();
   }
 
   initForm(initialData: any = {}): void {
     this._form = this.model.buildForm(initialData);
+    this.model.form = this._form;
   }
 
   queryRoute(query: CallableFunction): void {
