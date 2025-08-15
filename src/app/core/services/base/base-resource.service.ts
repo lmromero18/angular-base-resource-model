@@ -72,13 +72,6 @@ export abstract class BaseResourceService<T = any> {
   /** Modo de ejecución para peticiones: 'server' o 'client'. */
   private _executionMode: 'server' | 'client' = 'server';
 
-  /**
-   * Inicializa el formulario principal del recurso.
-   * @param initialData Datos opcionales a precargar en el formulario.
-   */
-  initForm(initialData: Partial<T> = {}) {
-    this.form = this.formService.buildForm(this.attributes, initialData);
-  }
 
   /**
    * Crea y retorna un nuevo formulario reactivo.
