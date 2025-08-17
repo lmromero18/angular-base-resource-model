@@ -9,7 +9,7 @@ import { FormField } from '../../../core/models/form-field.model';
 })
 export class PostsTableService extends BaseResourceService {
   override name = 'Posts';
-  override endpoint = 'posts';
+  override endpoint = 'cuenta';
   override primaryKey = 'id';
 
   override attributes: Attribute[] = [

@@ -8,6 +8,7 @@ import { httpErrorInterceptor } from './core/interceptors/http-error.interceptor
 import { JWT_OPTIONS, JwtHelperService } from '@auth0/angular-jwt';
 import { serverHttpInterceptor } from './core/interceptors/server.interceptor';
 import { httpTransferStateInterceptor } from './core/interceptors/http-transfer-state.interceptor';
+import { cryptoInterceptor } from './core/crypto/crypto.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -19,7 +20,8 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         httpTransferStateInterceptor,
         httpErrorInterceptor,
-        serverHttpInterceptor
+        serverHttpInterceptor,
+        cryptoInterceptor,
       ])
 
     ),

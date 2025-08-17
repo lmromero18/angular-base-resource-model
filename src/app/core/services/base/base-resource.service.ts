@@ -532,11 +532,6 @@ export abstract class BaseResourceService<T = any> {
             return afterSavedCallBack(data);
           }
 
-          console.log(
-            `Guardado exitoso para un ${this.isNew ? 'CREAR' : 'ACTUALIZAR CON ID' + this.primaryKeyValue}`,
-            data,
-          );
-
           // this.messageService.createMessage({
           //   type: 'success',
           //   message: this.isNew ? 'Creación exitosa' : 'Actualización exitosa',
