@@ -116,4 +116,11 @@ export class HttpResourceService<T = any> {
   public setExecutionMode(mode: 'server' | 'client') {
     this.executionMode = mode;
   }
+
+  get<R = any>(endpoint: string, params: HttpParams | any = {}): Observable<R> {
+    return this.http.get<R>(`${this.getBaseUrl()}/${endpoint}`, {
+      ...this.buildHeaders(),
+      params,
+    });
+  }
 }
