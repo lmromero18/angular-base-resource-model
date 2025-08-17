@@ -18,9 +18,7 @@ export class PostsTableService extends BaseResourceService {
       label: 'ID',
       input: new FormField({
         type: 'hidden',
-        required: true,
         class: 'col-span-12',
-        validators: [Validators.required],
       }),
     }),
     new Attribute({

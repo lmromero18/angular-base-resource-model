@@ -29,19 +29,13 @@ export class FormComponent implements OnInit {
   }
 
   onSubmit() {
+    console.log("ENTEJRHJEJKKL")
     if (this.form.valid) {
-      const executeSubmit =
-        this.customSubmit ??
-        (() =>
-          this.model.post(
-            () => this.submitted.emit(),
-            (err) => console.error('Error en el submit:', err),
-          ));
-
-      executeSubmit();
+      console.log("PEPEA");
+      
+      this.model.save();
     } else {
       this.form.markAllAsTouched();
-      console.warn('Formulario inválido');
     }
   }
 

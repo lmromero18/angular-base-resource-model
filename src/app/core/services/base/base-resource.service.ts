@@ -7,7 +7,7 @@ import { HttpResourceService } from './http-resource.service';
 import { ModelSelectOption } from '../../models/select-option.model';
 import { IPagination } from '../../models/paginated-response.model';
 import { finalize, Observable } from 'rxjs';
-import { HttpParams } from '@angular/common/http';
+import { HttpHeaders, HttpParams } from '@angular/common/http';
 
 /**
  * Clase base abstracta para gestionar recursos con formularios, peticiones HTTP y atributos declarativos.
@@ -171,6 +171,13 @@ export abstract class BaseResourceService<T = any> {
   }
 
   /**
+   * Construye en enpoint
+   */
+  getEndpoint() {
+    return this._customEndpoint || this.endpoint;
+  }
+
+  /**
    * Agrega un filtro tipo where al endpoint para consulta de datos.
    */
   where(
@@ -215,7 +222,7 @@ export abstract class BaseResourceService<T = any> {
     onError?: (error: any) => void,
   ): void {
     this.isLoading = true;
-    const endpoint = this._customEndpoint || this.endpoint;
+    const endpoint = this.getEndpoint();
     this.httpService
       .getAll(endpoint, this.params)
       .pipe(
@@ -246,7 +253,7 @@ export abstract class BaseResourceService<T = any> {
 
   /** Elimina un recurso por su ID. */
   delete(id: string | number) {
-    const endpoint = this._customEndpoint || this.endpoint;
+    const endpoint = this.getEndpoint();
     return this.httpService.delete(endpoint, id);
   }
 
@@ -256,7 +263,7 @@ export abstract class BaseResourceService<T = any> {
     onError?: (error: any) => void,
   ): void {
     this.isLoading = true;
-    const endpoint = this._customEndpoint || this.endpoint;
+    const endpoint = this.getEndpoint();
     const payload = this.getValues();
 
     this.httpService
@@ -283,10 +290,10 @@ export abstract class BaseResourceService<T = any> {
     onError?: (error: any) => void,
   ): void {
     this.isLoading = true;
-    const endpoint = this._customEndpoint || this.endpoint;
+    const endpoint = this.getEndpoint();
 
     this.httpService
-      .put<R>(endpoint, id, this.getValues())
+      .patch<R>(endpoint, id, this.getValues())
       .pipe(
         finalize(() => {
           this.isLoading = false;
@@ -324,7 +331,7 @@ export abstract class BaseResourceService<T = any> {
     onError?: (error: any) => void,
   ): void {
     this.isLoading = true;
-    const endpoint = this._customEndpoint || this.endpoint;
+    const endpoint = this.getEndpoint();
 
     this.httpService
       .show<R>(endpoint, id)
@@ -422,5 +429,129 @@ export abstract class BaseResourceService<T = any> {
     this.httpService.setUrlType('custom');
     this.httpService.setCustomUrl(urlType);
     return this;
+  }
+
+  /**
+   * Obtiene los atributos filtrables del modelo.
+   * @returns Un array de atributos filtrables.
+   */
+  public filtrables() {
+    return this.attributes.filter(
+      (item: Attribute) => item?.table?.filtrable && item.input,
+    );
+  }
+
+  /**
+   * Obtiene los filtros aplicados al modelo.
+   * @returns Un array de filtros aplicados.
+   */
+  public getFilters(): Attribute[] {
+    if (this.notFiltrables().length > 0) {
+      this.notFiltrables().forEach((filter) => {
+        this.form.get(filter?.name)?.setValidators(null);
+      });
+    }
+
+    return (
+      this.filtrables()
+        // .sort((a, b) => a.filter_order - b.filter_order)
+        .map((item: Attribute) => {
+          const input = item;
+          // if (!input.validateFilter) {
+          //   input.formControl.setValidators(null);
+          // }
+
+          return input;
+        })
+    );
+  }
+
+  /**
+   * Obtiene los atributos que no son filtrables.
+   * @returns Un array de atributos que no son filtrables.
+   */
+  public notFiltrables() {
+    return this.attributes.filter(
+      (item: Attribute) => !item?.table?.filtrable && item.input,
+    );
+  }
+
+  /**
+   * Limpiar valores de los filtros
+   */
+  clearFilters() {
+    this.form.reset();
+    this.getFilters().map((element) => {
+      this.form.get(element?.name)?.setValue(null);
+      if (element.input) {
+        element.input.value = null;
+        this.form.get(element?.name)?.updateValueAndValidity();
+      }
+    });
+  }
+
+  /**
+   * Guarda los datos actuales en el servidor.
+   * Si los datos son nuevos, se crearán. Si ya existen, se actualizarán.
+   * @param afterSavedCallBack Función que se llamará después de guardar exitosamente.
+   * Si no se proporciona, se mostrará un mensaje de éxito.
+   * @param onErrorCallback Función que se llamará si ocurre un error durante la petición.
+   * Si no se proporciona, se mostrará un mensaje de error.
+   * @returns Una suscripción que puede ser utilizada para cancelar la petición.
+   */
+  public save(
+    afterSavedCallBack?: CallableFunction,
+    onErrorCallback?: CallableFunction,
+  ) {
+    this.isLoading = true;
+    let url = this.getEndpoint();
+    const values = this.getValues();
+
+    // if (values instanceof FormData) {
+    //   let httpMethod: string = 'POST';
+    //   if (!this.isNew) {
+    //     values.append('_method', 'PATCH');
+    //   }
+    // }
+
+    const body: { body?: FormData | any } = values;
+
+    let httpRequest = this.isNew
+      ? this.httpService.post(url, body)
+      : this.httpService.patch(url, this.primaryKeyValue!, body);
+
+    return httpRequest
+      .pipe(
+        finalize(() => {
+          this.isLoading = false;
+        }),
+      )
+      .subscribe({
+        next: (data) => {
+          if (afterSavedCallBack) {
+            return afterSavedCallBack(data);
+          }
+
+          console.log(
+            `Guardado exitoso para un ${this.isNew ? 'CREAR' : 'ACTUALIZAR CON ID' + this.primaryKeyValue}`,
+            data,
+          );
+
+          // this.messageService.createMessage({
+          //   type: 'success',
+          //   message: this.isNew ? 'Creación exitosa' : 'Actualización exitosa',
+          //   options: {
+          //     nzPauseOnHover: true,
+          //     nzDuration: 3500,
+          //   },
+          // });
+          this.clearFilters();
+        },
+        error: (err) => {
+          if (onErrorCallback) {
+            return onErrorCallback(err);
+          }
+        },
+      });
   }
 }

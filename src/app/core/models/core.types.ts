@@ -20,7 +20,7 @@ export interface ITableField {
   width?: string;
   align?: 'left' | 'center' | 'right';
   sortable?: boolean;
-  filterable?: boolean;
+  filtrable?: boolean;
   formatter?: (row: any) => string;
   value?: any;
 }
