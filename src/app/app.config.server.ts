@@ -23,8 +23,6 @@ function serverJwkInitializer() {
           catchError(err => throwError(() => err))
         )
       );
-      console.log('[SSR] JWK OK', jwk);
-
       if (!jwk) throw new Error('SSR: respuesta sin JWK');
       ts.set(JWK_STATE, jwk);
     } catch (e) {
