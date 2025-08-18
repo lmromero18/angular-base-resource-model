@@ -227,6 +227,7 @@ export abstract class BaseResourceService<T = any> {
       .getAll(endpoint, this.params)
       .pipe(
         finalize(() => {
+          console.log('asddsasdasd');
           this.isLoading = false;
         }),
       )

@@ -23,28 +23,28 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'posts',
+    path: 'carro',
     canActivate: [authGuard],
     children: [
       {
         path: '',
         loadComponent: () =>
-          import('./pages/posts/table/posts-table.component').then(
-            (m) => m.PostsTableComponent,
+          import('./pages/carro/table/carro-table.component').then(
+            (m) => m.CarroTableComponent,
           ),
       },
       {
         path: 'crear',
         loadComponent: () =>
-          import('./pages/posts/form/posts-form.component').then(
-            (m) => m.PostsFormComponent,
+          import('./pages/carro/form/carro-form.component').then(
+            (m) => m.CarroFormComponent,
           ),
       },
       {
         path: ':id',
         loadComponent: () =>
-          import('./pages/posts/form/posts-form.component').then(
-            (m) => m.PostsFormComponent,
+          import('./pages/carro/form/carro-form.component').then(
+            (m) => m.CarroFormComponent,
           ),
       },
     ],
