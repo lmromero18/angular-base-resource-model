@@ -1,7 +1,7 @@
 <table class="w-full table-auto border border-collapse border-gray-300">
   <thead>
     <tr>
-      @for (col of columns; track col.name) {
+      @for (col of this.model.getListableAttributes(); track col.name) {
         <th class="border p-2 text-left">
           {{ col.label }}
         </th>
@@ -9,10 +9,10 @@
     </tr>
   </thead>
   <tbody>
-    @if (rows.length > 0) {
-      @for (row of rows; track row[model.primaryKey]) {
+    @if (this.model.items.length > 0) {
+      @for (row of this.model.items; track row[model.primaryKey]) {
         <tr>
-          @for (col of columns; track col.name) {
+          @for (col of this.model.getListableAttributes(); track col.name) {
             <td class="border p-2">
               {{ row[col.name] }}
             </td>
@@ -21,13 +21,19 @@
       }
     } @else if (model.isLoading) {
       <tr>
-        <td [attr.colspan]="columns.length" class="text-center p-4">
+        <td
+          [attr.colspan]="this.model.getListableAttributes().length"
+          class="text-center p-4"
+        >
           Cargando...
         </td>
       </tr>
     } @else {
       <tr>
-        <td [attr.colspan]="columns.length" class="text-center p-4">
+        <td
+          [attr.colspan]="this.model.getListableAttributes().length"
+          class="text-center p-4"
+        >
           No hay datos disponibles.
         </td>
       </tr>

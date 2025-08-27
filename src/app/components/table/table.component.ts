@@ -19,13 +19,5 @@ export class TableComponent implements OnInit {
   @Input() model!: BaseResourceService;
   @Input() endpoint?: string;
 
-  get rows(): any[] {
-    return this.model.items;
-  }
-
-  get columns(): Attribute[] {
-    return this.model.getListableAttributes();
-  }
-
   ngOnInit(): void {}
 }

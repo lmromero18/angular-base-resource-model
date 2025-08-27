@@ -6,6 +6,7 @@ import { ControllerComponent } from '../../core/base/controller';
 import { IAuthResponse } from '../../core/models/auth.model';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { LoginService } from './login.service';
+import { redirectTo } from '../../utils/route-utils';
 
 @Component({
   selector: 'app-login',
@@ -30,12 +31,10 @@ export class LoginComponent extends ControllerComponent<LoginService> {
   public customSubmit = () =>
     this.model.post<IAuthResponse>(
       (res) => {
-        // this.authService.savePayload(res);
         this.form.reset();
-        this.router.navigate(['/carro']);
+        redirectTo('/carro');
       },
       (err) => {
-        // Clear form fields even on failure to avoid lingering sensitive data
         this.form.reset();
       },
     );

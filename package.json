@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "start:dev": "ng serve --configuration=development",
+    "start:dev": "ng serve --configuration=development --host 127.0.0.1",
     "start:stage": "ng serve --configuration=staging",
     "build:prod": "ng build --configuration=production",
     "build:stage": "ng build --configuration=staging",
