@@ -10,9 +10,7 @@ export const routes: Routes = [
   {
     path: 'Ingresar',
     loadComponent: () =>
-      import('./pages/auth/login/login.component').then(
-        (m) => m.LoginComponent,
-      ),
+      import('./pages/login/login.component').then((m) => m.LoginComponent),
   },
   {
     path: 'parametro-sistema',

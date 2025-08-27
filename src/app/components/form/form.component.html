@@ -5,8 +5,6 @@
 >
   @for (attr of fields; track attr.name) {
     @if (attr.input?.type === "text") {
-      <span>{{ attr | json }}ddddd</span>
-      <span>{{ attr.input?.value }}ddddd</span>
       <div [class]="attr.input?.class ?? 'col-span-12'">
         <label>{{ attr.label }}</label>
         <input [formControlName]="attr.name" type="text" class="input" />

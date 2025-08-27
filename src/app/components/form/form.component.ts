@@ -29,11 +29,12 @@ export class FormComponent implements OnInit {
   }
 
   onSubmit() {
-    console.log("ENTEJRHJEJKKL")
     if (this.form.valid) {
-      console.log("PEPEA");
-      
-      this.model.save();
+      if (this.customSubmit) {
+        this.customSubmit();
+      } else {
+        this.model.save();
+      }
     } else {
       this.form.markAllAsTouched();
     }

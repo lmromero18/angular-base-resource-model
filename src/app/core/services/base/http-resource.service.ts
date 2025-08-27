@@ -37,14 +37,7 @@ export class HttpResourceService<T = any> {
   }
 
   private buildHeaders(): { headers?: HttpHeaders; withCredentials?: boolean } {
-    // if (this.executionMode === 'server')
     return { withCredentials: true };
-    const token = this.authService.getToken();
-    const headers = new HttpHeaders({
-      Authorization: `Bearer ${token}`,
-      'Cache-Control': 'no-cache',
-    });
-    return { headers };
   }
 
   getAll(
@@ -112,7 +105,7 @@ export class HttpResourceService<T = any> {
       this.buildHeaders(),
     );
   }
-  
+
   get<R = any>(endpoint: string, params: HttpParams | any = {}): Observable<R> {
     return this.http.get<R>(`${this.getBaseUrl()}/${endpoint}`, {
       ...this.buildHeaders(),
@@ -123,6 +116,4 @@ export class HttpResourceService<T = any> {
   public setExecutionMode(mode: 'server' | 'client') {
     this.executionMode = mode;
   }
-
-
 }
