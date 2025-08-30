@@ -14,8 +14,7 @@ import { CarroTableService } from './carro-table.service';
 })
 export class CarroTableComponent
   extends ControllerComponent<CarroTableService>
-  implements OnInit
-{
+  implements OnInit {
   constructor(
     injector: Injector,
     public authService: AuthService,
@@ -23,12 +22,23 @@ export class CarroTableComponent
     super(injector, CarroTableService);
   }
 
+
   ngOnInit(): void {
     this.model.getAll((carro: ICarro[]) => {
       console.log(carro);
       console.log(this.model.pagination);
     });
+
+    this.model.addAction('ver_detalle', {
+      can: () => true,
+      disable: (item: any) => false,
+      class: () => "btn text-dark-300",
+      link: (item: any) => "Visualizar/" + item[this.model.primaryKey],
+      icon: () => "eye",
+      tooltip: () => "Ver detalle",
+    });
+
   }
 
-  ngDoCheck(): void {}
+  ngDoCheck(): void { }
 }

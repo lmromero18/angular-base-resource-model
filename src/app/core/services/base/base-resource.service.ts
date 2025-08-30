@@ -8,6 +8,7 @@ import { ModelSelectOption } from '../../models/select-option.model';
 import { IPagination } from '../../models/paginated-response.model';
 import { finalize, Observable } from 'rxjs';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
+import { ActionButton, Actions, ActionKey, resolve, ValueOrFn } from '../../models/core.types';
 
 /**
  * Clase base abstracta para gestionar recursos con formularios, peticiones HTTP y atributos declarativos.
@@ -36,6 +37,88 @@ export abstract class BaseResourceService<T = any> {
     from: 0,
     to: 0,
   };
+
+  /**
+   * Constructor para inicializar el servicio.
+   */
+  constructor() {
+    this.boot();
+  }
+
+  /**
+   * Inicializa otros recursos necesarios.
+   */
+  public boot() { }
+
+  /** Permisos disponibles para el recurso. */
+  public permissions: Record<string, string | boolean> = {
+    create: '',
+    read: '',
+    update: '',
+    delete: '',
+  };
+
+  /**
+   * Acciones disponibles para el recurso.
+   */
+  public actions: Actions<T> = this.buildDefaultActions();
+
+  /** Fábrica de acciones por defecto (usa this.primaryKey) */
+  protected buildDefaultActions(): Actions<T> {
+    return {
+      create: {
+        name: 'create',
+        text: 'Crear',
+        can: true,
+        class: 'btn-primary',
+        link: 'Crear',
+        icon: 'plus',
+        tooltip: 'Crear',
+      },
+      read: {
+        name: 'read',
+        can: true,
+        disable: false,
+        class: 'btn text-dark-300',
+        link: (item: any) => `Detalle/${item?.[this.primaryKey]}`,
+        icon: 'eye',
+        tooltip: 'Detalle',
+        text: 'Detalles',
+      },
+      update: {
+        name: 'update',
+        can: true,
+        disable: false,
+        class: 'btn text-dark-300',
+        link: (item: any) => `Editar/${item?.[this.primaryKey]}`,
+        icon: 'edit',
+        tooltip: 'Editar',
+        text: 'Editar',
+      },
+      delete: {
+        name: 'delete',
+        can: true,
+        disable: false,
+        class: 'btn text-danger',
+        icon: 'delete',
+        tooltip: 'Eliminar',
+        text: 'Eliminar',
+        click: (item: any) => this.delete(item?.[this.primaryKey] ?? item),
+      },
+      download: {
+        name: 'download',
+        can: true,
+        disable: true,
+        class: 'btn-light-600',
+        icon: 'download',
+        tooltip: 'Descargar',
+        text: 'Descargar',
+        allowedTypes: ['XLSX'],
+        click: () => { },
+      },
+    };
+  }
+
 
   /** Tipo de URL personalizada para el modelo. */
   private _customUrlType?: string;
@@ -68,9 +151,6 @@ export abstract class BaseResourceService<T = any> {
   protected fb = inject(FormBuilder);
   protected formService = inject(FormBuilderService);
   protected httpService = inject(HttpResourceService<T>);
-
-  /** Modo de ejecución para peticiones: 'server' o 'client'. */
-  private _executionMode: 'server' | 'client' = 'server';
 
   /**
    * Inicializa el formulario principal del recurso.
@@ -196,20 +276,6 @@ export abstract class BaseResourceService<T = any> {
   public new(): this {
     const clone = Object.create(this);
     return clone;
-  }
-
-  /** Devuelve el modo actual de ejecución ('server' o 'client'). */
-  getExecutionMode(): 'server' | 'client' {
-    return this._executionMode;
-  }
-
-  /**
-   * Define el modo de ejecución para futuras peticiones.
-   */
-  side(mode: 'server' | 'client'): this {
-    this._executionMode = mode;
-    this.httpService.setExecutionMode(mode);
-    return this;
   }
 
   /**
@@ -549,4 +615,155 @@ export abstract class BaseResourceService<T = any> {
         },
       });
   }
+
+  /** Obtiene una acción por nombre (incluye personalizadas) */
+  public getActionButton(name: ActionKey): ActionButton<T> {
+    return this.actions[name];
+  }
+
+  /**
+   * Obtiene los botones de acción para un elemento específico.
+   * @param item El elemento para el cual obtener los botones de acción.
+   * @param opts Opciones adicionales para filtrar los botones de acción.
+   * @returns Un array de nombres de botones de acción.
+   */
+
+  public getActionButtons(
+    item?: T,
+    opts?: {
+      include?: string[];      // solo estas
+      exclude?: string[];      // excluir estas
+      section?: string;        // si usas secciones
+      sort?: (a: string, b: string) => number; // orden personalizado
+      onlyEnabled?: boolean;   // omite las disabled
+      onlyAllowed?: boolean;   // omite las que can=false
+    },
+  ): string[] {
+    const keys = Object.keys(this.actions);
+
+    const filtered = keys.filter((name) => {
+      const a = this.actions[name];
+      if (!a) return false;
+
+      if (opts?.include && !opts.include.includes(name)) return false;
+      if (opts?.exclude && opts.exclude.includes(name)) return false;
+      if (opts?.section) {
+        const sec = typeof a.section === 'function' ? a.section(item) : a.section;
+        if (sec !== opts.section) return false;
+      }
+      if (opts?.onlyAllowed && !this.can(name, item)) return false;
+      if (opts?.onlyEnabled && this.isDisabled(name, item)) return false;
+
+      return true;
+    });
+
+    return opts?.sort ? filtered.sort(opts.sort) : filtered;
+  }
+
+  /** Agrega o reemplaza una acción (personalizadas soportadas) */
+  public addAction(name: ActionKey, options: ActionButton<T>) {
+    this.actions[name] = { ...options, name };
+  }
+
+  /** Setters genéricos (evitan duplicados por acción) */
+  public setCan(name: ActionKey, v: ValueOrFn<boolean, T>) {
+    if (!this.actions[name]) return;
+    this.actions[name].can = v;
+  }
+  public setDisabled(name: ActionKey, v: ValueOrFn<boolean, T>) {
+    if (!this.actions[name]) return;
+    this.actions[name].disable = v;
+  }
+  public setAllowedTypes(v: ValueOrFn<string[], T>) {
+    const a = this.actions['download'];
+    if (!a) return;
+    (a as any).allowedTypes = v;
+  }
+
+  // Atajos semánticos para las acciones built-in (si te gustan)
+  public get createButton(): ActionButton<T> { return this.actions['create']; }
+  public get downloadButton(): ActionButton<T> { return this.actions['download']; }
+
+  // ======== EVALUADORES UNIFORMES (valor o función) ========
+
+  public can(name: ActionKey, item?: T): boolean {
+    const a = this.actions[name];
+    return a ? resolve(a.can ?? true, item) : false;
+  }
+
+  public isDisabled(name: ActionKey, item?: T): boolean {
+    const a = this.actions[name];
+    return a ? resolve(a.disable ?? false, item) : true;
+  }
+
+  public label(name: ActionKey, item?: T): string {
+    const a = this.actions[name];
+    return a ? String(resolve(a.text ?? '', item)) : '';
+  }
+
+  public css(name: ActionKey, item?: T): string {
+    const a = this.actions[name];
+    return a ? String(resolve(a.class ?? '', item)) : '';
+  }
+
+  public href(name: ActionKey, item?: T): string | undefined {
+    const a = this.actions[name];
+    const link = a?.link;
+    return link ? resolve(link, item) : undefined;
+  }
+
+  public iconOf(name: ActionKey, item?: T): string | undefined {
+    const a = this.actions[name];
+    const ic = a?.icon;
+    return ic ? resolve(ic, item) : undefined;
+  }
+
+  public allowedTypes(name: 'download' = 'download', item?: T): string[] {
+    const a = this.actions[name] as any;
+    const at = a?.allowedTypes;
+    return at ? resolve<string[], T>(at, item) : [];
+  }
+
+  public click(name: ActionKey, item?: T) {
+    const a = this.actions[name];
+    a?.click?.(item);
+  }
+
+  // ======== (Opcional) deprecación de setters específicos ========
+  // Si quieres mantener compatibilidad temporal con tu API anterior:
+  public set canCreate(v: any) { this.setCan('create', v); }
+  public get canCreate() { return this.getActionButton('create')?.can; }
+
+  public set canRead(v: any) { this.setCan('read', v); }
+  public get canRead() { return this.getActionButton('read')?.can; }
+
+  public set canUpdate(v: any) { this.setCan('update', v); }
+  public get canUpdate() { return this.getActionButton('update')?.can; }
+
+  public set canDelete(v: any) { this.setCan('delete', v); }
+  public get canDelete() { return this.getActionButton('delete')?.can; }
+
+  public set canDownload(v: any) { this.setCan('download', v); }
+  public get canDownload() { return this.getActionButton('download')?.can; }
+
+  public set disableUpdate(v: any) { this.setDisabled('update', v); }
+  public get disableUpdate() { return this.getActionButton('update')?.disable; }
+
+  public set disableRead(v: any) { this.setDisabled('read', v); }
+  public get disableRead() { return this.getActionButton('read')?.disable; }
+
+  public set disableDelete(v: any) { this.setDisabled('delete', v); }
+  public get disableDelete() { return this.getActionButton('delete')?.disable; }
+
+  public set disableDownload(v: any) { this.setDisabled('download', v); }
+  public get disableDownload() { return this.getActionButton('download')?.disable; }
+
+  public set allowedTypesDownload(v: any) { this.setAllowedTypes(v); }
+  public get allowedTypesDownload() { return (this.actions['download'] as any)?.allowedTypes; }
+
+  // public setAfter(callback: CallableFunction) {
+  //   this.afterListResponse = callback;
+
+  //   return this;
+  // }
 }

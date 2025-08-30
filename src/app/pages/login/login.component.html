@@ -1,1 +1,14 @@
 <app-form [model]="model" [customSubmit]="customSubmit" />
+
+@if (model.can('ver_detalle')) {
+  <button
+    type="button"
+    [disabled]="model.isDisabled('ver_detalle')"
+    [ngClass]="model.css('ver_detalle')"
+    (click)="model.click('ver_detalle')"
+    [attr.title]="model.label('ver_detalle')">
+
+    <i [class]="model.iconOf('ver_detalle')"></i>
+    {{ model.label('ver_detalle') }}
+  </button>
+}
