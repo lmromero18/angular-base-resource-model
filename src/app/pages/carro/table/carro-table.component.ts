@@ -37,10 +37,6 @@ export class CarroTableComponent
 
   logOut(): void {
     this.authService.logout();
-    this.model.getAll((carro: ICarro[]) => {
-      console.log(carro);
-      console.log(this.model.pagination);
-    });
   }
 
   ngDoCheck(): void {}

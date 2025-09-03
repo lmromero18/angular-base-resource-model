@@ -1,9 +1,8 @@
-import { CommonModule } from '@angular/common';
 import {
   Component,
   Injector,
-  makeStateKey,
   TransferState,
+  makeStateKey,
 } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,6 +12,7 @@ import { IS_AUTHENTICATED_KEY } from '../../core/core.states.key';
 import { IAuthResponse } from '../../core/models/auth.model';
 import { redirectTo } from '../../utils/route-utils';
 import { LoginService } from './login.service';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-login',
@@ -26,6 +26,20 @@ export class LoginComponent extends ControllerComponent<LoginService> {
     public router: Router,
   ) {
     super(injector, LoginService);
+  }
+
+  //init
+  ngOnInit(): void {
+    this.model.addAction('ver_detalle', {
+      text: () => 'Ver detalle',
+      can: () => true,
+      disable: (item: any) => false,
+      class: () => 'btn text-dark-300',
+      link: (item: any) => 'Visualizar/' + item[this.model.primaryKey],
+      icon: () => 'eye',
+      tooltip: () => 'Ver detalle',
+      click: () => {},
+    });
   }
 
   /**
@@ -48,17 +62,4 @@ export class LoginComponent extends ControllerComponent<LoginService> {
         this.form.reset();
       },
     );
-
-  ngOnInit(): void {
-    this.model.addAction('ver_detalle', {
-      text: () => 'Ver detalle',
-      can: () => true,
-      disable: (item: any) => false,
-      class: () => 'btn text-dark-300',
-      link: (item: any) => 'Visualizar/' + item[this.model.primaryKey],
-      icon: () => 'eye',
-      tooltip: () => 'Ver detalle',
-      click: () => {},
-    });
-  }
 }
