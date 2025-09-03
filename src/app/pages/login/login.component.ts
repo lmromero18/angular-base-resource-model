@@ -28,20 +28,6 @@ export class LoginComponent extends ControllerComponent<LoginService> {
     super(injector, LoginService);
   }
 
-  //init
-  ngOnInit(): void {
-    this.model.addAction('ver_detalle', {
-      text: () => 'Ver detalle',
-      can: () => true,
-      disable: (item: any) => false,
-      class: () => 'btn text-dark-300',
-      link: (item: any) => 'Visualizar/' + item[this.model.primaryKey],
-      icon: () => 'eye',
-      tooltip: () => 'Ver detalle',
-      click: () => {},
-    });
-  }
-
   /**
    * Realiza la solicitud de login al backend usando `model.create()`
    * y guarda el token si el login fue exitoso.
