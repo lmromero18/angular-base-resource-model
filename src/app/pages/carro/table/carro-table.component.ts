@@ -32,7 +32,9 @@ export class CarroTableComponent
       icon: () => 'eye',
       tooltip: () => 'Ver detalle',
     });
-    this.model.getAll((carros: ICarro[]) => {});
+    this.model.getAll((carros: ICarro[]) => {
+      console.log(carros);
+    });
   }
 
   logOut(): void {
