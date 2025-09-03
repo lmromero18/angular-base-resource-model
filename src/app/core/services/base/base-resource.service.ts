@@ -223,32 +223,26 @@ export abstract class BaseResourceService<T = any> {
   ): void {
     this.isLoading = true;
     const endpoint = this.getEndpoint();
-    this.httpService
-      .getAll(endpoint, this.params)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (response) => {
-          const items = response?.data || response;
-          this.items = items;
-          this.pagination = {
-            currentPage: response?.current_page,
-            lastPage: response?.last_page,
-            perPage: response?.per_page,
-            total: response?.total,
-            from: response?.from,
-            to: response?.to,
-          };
-          if (onSuccess) onSuccess(items);
-        },
-        error: (err) => {
-          // console.error('Error fetching data:', err?.message || err);
-          if (onError) onError(err);
-        },
-      });
+    this.httpService.getAll(endpoint, this.params).subscribe({
+      next: (response) => {
+        const items = response?.data || response;
+        this.items = items;
+        this.pagination = {
+          currentPage: response?.current_page,
+          lastPage: response?.last_page,
+          perPage: response?.per_page,
+          total: response?.total,
+          from: response?.from,
+          to: response?.to,
+        };
+        this.isLoading = false;
+        if (onSuccess) onSuccess(items);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (onError) onError(err);
+      },
+    });
   }
 
   /** Elimina un recurso por su ID. */
@@ -266,21 +260,16 @@ export abstract class BaseResourceService<T = any> {
     const endpoint = this.getEndpoint();
     const payload = this.getValues();
 
-    this.httpService
-      .post<R>(endpoint, payload)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (res) => {
-          if (onSuccess) onSuccess(res);
-        },
-        error: (err) => {
-          if (onError) onError(err);
-        },
-      });
+    this.httpService.post<R>(endpoint, payload).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        if (onSuccess) onSuccess(res);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        if (onError) onError(err);
+      },
+    });
   }
 
   /** Actualiza un recurso existente por ID y maneja callbacks */
@@ -292,17 +281,16 @@ export abstract class BaseResourceService<T = any> {
     this.isLoading = true;
     const endpoint = this.getEndpoint();
 
-    this.httpService
-      .patch<R>(endpoint, id, this.getValues())
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (res) => onSuccess?.(res),
-        error: (err) => onError?.(err),
-      });
+    this.httpService.patch<R>(endpoint, id, this.getValues()).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        onSuccess?.(res);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        onError?.(err);
+      },
+    });
   }
 
   public initModel(model: this, values: any, pk: any) {
@@ -333,20 +321,17 @@ export abstract class BaseResourceService<T = any> {
     this.isLoading = true;
     const endpoint = this.getEndpoint();
 
-    this.httpService
-      .show<R>(endpoint, id)
-      .pipe(
-        finalize(() => {
-          this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (res) => {
-          this.initModel(this, res, id);
-          onSuccess?.(res);
-        },
-        error: (err) => onError?.(err),
-      });
+    this.httpService.show<R>(endpoint, id).subscribe({
+      next: (res) => {
+        this.initModel(this, res, id);
+        this.isLoading = false;
+        onSuccess?.(res);
+      },
+      error: (err) => {
+        this.isLoading = false;
+        onError?.(err);
+      },
+    });
   }
 
   /**
@@ -520,33 +505,29 @@ export abstract class BaseResourceService<T = any> {
       ? this.httpService.post(url, body)
       : this.httpService.patch(url, this.primaryKeyValue!, body);
 
-    return httpRequest
-      .pipe(
-        finalize(() => {
+    return httpRequest.subscribe({
+      next: (data) => {
+        if (afterSavedCallBack) {
           this.isLoading = false;
-        }),
-      )
-      .subscribe({
-        next: (data) => {
-          if (afterSavedCallBack) {
-            return afterSavedCallBack(data);
-          }
+          return afterSavedCallBack(data);
+        }
 
-          // this.messageService.createMessage({
-          //   type: 'success',
-          //   message: this.isNew ? 'Creación exitosa' : 'Actualización exitosa',
-          //   options: {
-          //     nzPauseOnHover: true,
-          //     nzDuration: 3500,
-          //   },
-          // });
-          this.clearFilters();
-        },
-        error: (err) => {
-          if (onErrorCallback) {
-            return onErrorCallback(err);
-          }
-        },
-      });
+        // this.messageService.createMessage({
+        //   type: 'success',
+        //   message: this.isNew ? 'Creación exitosa' : 'Actualización exitosa',
+        //   options: {
+        //     nzPauseOnHover: true,
+        //     nzDuration: 3500,
+        //   },
+        // });
+        this.isLoading = false;
+        this.clearFilters();
+      },
+      error: (err) => {
+        if (onErrorCallback) {
+          return onErrorCallback(err);
+        }
+      },
+    });
   }
 }

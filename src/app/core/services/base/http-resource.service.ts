@@ -1,15 +1,12 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
+import { Injectable, TransferState, inject, makeStateKey } from '@angular/core';
 import { Observable, of, tap } from 'rxjs';
-import { TransferState, makeStateKey } from '@angular/core';
-import { AuthService } from '../auth/auth.service';
 import { environment } from '../../../../environments/environment';
 import { IPaginatedResponse } from '../../models/paginated-response.model';
 
 @Injectable({ providedIn: 'root' })
 export class HttpResourceService<T = any> {
   private http = inject(HttpClient);
-  private authService = inject(AuthService);
   private transferState = inject(TransferState);
   private executionMode: 'server' | 'client' = 'server';
 

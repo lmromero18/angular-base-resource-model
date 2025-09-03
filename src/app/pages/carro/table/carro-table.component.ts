@@ -24,10 +24,11 @@ export class CarroTableComponent
   }
 
   ngOnInit(): void {
-    this.model.getAll((carro: ICarro[]) => {
-      console.log(carro);
-      console.log(this.model.pagination);
-    });
+    this.model.getAll((carros: ICarro[]) => {});
+  }
+
+  logOut(): void {
+    this.authService.logout();
   }
 
   ngDoCheck(): void {}

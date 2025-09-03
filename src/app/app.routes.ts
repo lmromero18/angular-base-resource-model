@@ -4,11 +4,11 @@ import { authGuard } from './core/guard/auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: 'Ingresar',
+    redirectTo: 'ingresar',
     pathMatch: 'full',
   },
   {
-    path: 'Ingresar',
+    path: 'ingresar',
     loadComponent: () =>
       import('./pages/login/login.component').then((m) => m.LoginComponent),
   },

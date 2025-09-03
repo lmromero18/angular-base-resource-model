@@ -7,6 +7,8 @@ import { IAuthResponse } from '../../core/models/auth.model';
 import { AuthService } from '../../core/services/auth/auth.service';
 import { LoginService } from './login.service';
 import { redirectTo } from '../../utils/route-utils';
+import { TransferState, makeStateKey } from '@angular/core';
+import { IS_AUTHENTICATED_KEY } from '../../core/core.states.key';
 
 @Component({
   selector: 'app-login',
@@ -17,7 +19,6 @@ import { redirectTo } from '../../utils/route-utils';
 export class LoginComponent extends ControllerComponent<LoginService> {
   constructor(
     injector: Injector,
-    public authService: AuthService,
     public router: Router,
   ) {
     super(injector, LoginService);
@@ -32,6 +33,11 @@ export class LoginComponent extends ControllerComponent<LoginService> {
     this.model.post<IAuthResponse>(
       (res) => {
         this.form.reset();
+        // Mark authenticated in TransferState for SPA navigations
+        const IS_AUTHENTICATED_STATE_KEY =
+          makeStateKey<boolean>(IS_AUTHENTICATED_KEY);
+        const transferState = this.injector.get(TransferState);
+        transferState.set(IS_AUTHENTICATED_STATE_KEY, true);
         redirectTo('/carro');
       },
       (err) => {

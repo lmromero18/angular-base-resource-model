@@ -1,46 +1,35 @@
-import { inject } from '@angular/core';
+import { PLATFORM_ID, inject } from '@angular/core';
 import { CanActivateFn, UrlTree, Router } from '@angular/router';
-import { REQUEST, PLATFORM_ID } from '@angular/core';
-import { JwtHelperService } from '@auth0/angular-jwt';
-import { Request } from 'express';
 import { isPlatformBrowser } from '@angular/common';
+import { TransferState, makeStateKey } from '@angular/core';
 import { AuthService } from '../services/auth/auth.service';
+import { IS_AUTHENTICATED_KEY } from '../core.states.key';
+import { DEFAULT_LOGIN_ROUTE } from '../core.constants';
+
+const IS_AUTHENTICATED_STATE_KEY = makeStateKey<boolean>(IS_AUTHENTICATED_KEY);
 
 export const authGuard: CanActivateFn = (): boolean | UrlTree => {
-  const request = inject(REQUEST, { optional: true });
+  const authService = inject(AuthService);
+  const router = inject(Router);
   const platformId = inject(PLATFORM_ID);
+  const transferState = inject(TransferState);
 
-  const isBrowser = isPlatformBrowser(platformId);
-  let token: any = null;
-  let accessToken: string | undefined = undefined;
-
-  if (isBrowser) {
-    token = sessionStorage.getItem('access_token');
-  } else if (request?.headers?.get('cookie')) {
-    // Dividir las cookies y crear un objeto clave:valor
-    const cookies: any = request?.headers?.get('cookie')!
-      .split(';')
-      .map(c => c.trim());
-
-    token = cookies || null;
-
-    const accessTokenEntry = token?.find((c: any) => c.startsWith('access_token='));
-    console.log(accessTokenEntry);
-    
-    accessToken = accessTokenEntry?.split('=')[1] || null;
-    console.log('accessToken:', accessToken);
-    
+  // On the server (SSR), rely on the cookie from the incoming request
+  if (!isPlatformBrowser(platformId)) {
+    const token = authService.getToken();
+    const isAuthenticated = !!token;
+    transferState.set(IS_AUTHENTICATED_STATE_KEY, isAuthenticated);
+    return isAuthenticated ? true : router.createUrlTree([DEFAULT_LOGIN_ROUTE]);
   }
 
+  // In the browser, use the SSR-auth result carried via TransferState.
+  if (transferState.hasKey(IS_AUTHENTICATED_STATE_KEY)) {
+    const isAuthenticated = transferState.get(
+      IS_AUTHENTICATED_STATE_KEY,
+      false,
+    );
+    return isAuthenticated ? true : router.createUrlTree([DEFAULT_LOGIN_ROUTE]);
+  }
 
-  // let response = accessToken && authService.isValid(accessToken);
-  // console.log(response);
-  
-
-
-
-
-  // const isValid = !!(token && !jwtHelper.isTokenExpired(token));
-  // return response ? true : inject(Router).createUrlTree(['/Ingresar']);
-  return true;
+  return router.createUrlTree([DEFAULT_LOGIN_ROUTE]);
 };
