@@ -24,11 +24,23 @@ export class CarroTableComponent
   }
 
   ngOnInit(): void {
+    this.model.addAction('ver_detalle', {
+      can: () => true,
+      disable: (item: any) => false,
+      class: () => 'btn text-dark-300',
+      link: (item: any) => 'Visualizar/' + item[this.model.primaryKey],
+      icon: () => 'eye',
+      tooltip: () => 'Ver detalle',
+    });
     this.model.getAll((carros: ICarro[]) => {});
   }
 
   logOut(): void {
     this.authService.logout();
+    this.model.getAll((carro: ICarro[]) => {
+      console.log(carro);
+      console.log(this.model.pagination);
+    });
   }
 
   ngDoCheck(): void {}

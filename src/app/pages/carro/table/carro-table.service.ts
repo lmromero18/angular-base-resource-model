@@ -10,6 +10,20 @@ export class CarroTableService extends BaseResourceService {
   override endpoint = 'carro';
   override primaryKey = 'id';
 
+  override permissions: Record<string, string | boolean> = {
+    create: '',
+    read: '',
+    update: '',
+    delete: '',
+  };
+
+  public override boot() {
+    this.canCreate = () => true;
+    this.canDelete = () => true;
+    this.canRead = () => true;
+    this.canUpdate = () => true;
+  }
+
   override attributes: Attribute[] = [
     new Attribute({
       name: 'id',
