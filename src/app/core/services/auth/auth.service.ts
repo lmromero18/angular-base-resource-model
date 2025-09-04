@@ -132,16 +132,14 @@ export class AuthService {
   //   return scopes.filter((s) => s.startsWith(module + ':'));
   // }
 
-  //TODO: IMPLEMENT
   public isSuperUser(): boolean {
-    return false;
+    return this.getUser()?.isSuperUsuario;
   }
 
   public hasPermission(permission: string | string[]): boolean {
     const permissions = this.getPermissions();
-    if (!permission || !this.getToken()) return true;
+    if (!permission || !this.getToken() || this.isSuperUser()) return true;
     if (Array.isArray(permission)) {
-      if (permission.length === 0) return true;
       return permission.some((p) => permissions.includes(p));
     }
     return permissions.includes(permission);
