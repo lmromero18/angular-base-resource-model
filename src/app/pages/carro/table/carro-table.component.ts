@@ -36,9 +36,7 @@ export class CarroTableComponent
   }
 
   fetchData(): void {
-    this.model.getAll((carros: ICarro[]) => {
-      console.log(carros);
-    });
+    this.model.getAll((carros: ICarro[]) => {});
   }
 
   logOut(): void {

@@ -1,10 +1,17 @@
-import { PLATFORM_ID, inject } from '@angular/core';
-import { CanActivateFn, UrlTree, Router } from '@angular/router';
 import { isPlatformBrowser } from '@angular/common';
-import { TransferState, makeStateKey } from '@angular/core';
-import { AuthService } from '../services/auth/auth.service';
-import { IS_AUTHENTICATED_KEY } from '../core.states.key';
+import {
+  PLATFORM_ID,
+  TransferState,
+  inject,
+  makeStateKey,
+} from '@angular/core';
+import { CanActivateFn, Router, UrlTree } from '@angular/router';
 import { DEFAULT_LOGIN_ROUTE } from '../core.constants';
+import {
+  AUTH_EXPIRATION_TS_KEY,
+  IS_AUTHENTICATED_KEY,
+} from '../core.states.key';
+import { AuthService } from '../services/auth/auth.service';
 
 const IS_AUTHENTICATED_STATE_KEY = makeStateKey<boolean>(IS_AUTHENTICATED_KEY);
 
@@ -18,7 +25,18 @@ export const authGuard: CanActivateFn = (): boolean | UrlTree => {
   if (!isPlatformBrowser(platformId)) {
     const token = authService.getToken();
     const isAuthenticated = !!token;
+    // Decode exp from JWT if available to share with client
+    let exp: number | null = null;
+    try {
+      if (token) {
+        const payload: any = authService.jwtHelperService.decodeToken(token);
+        exp = typeof payload?.exp === 'number' ? payload.exp : null;
+      }
+    } catch {}
     transferState.set(IS_AUTHENTICATED_STATE_KEY, isAuthenticated);
+    if (exp) {
+      transferState.set(makeStateKey<number>(AUTH_EXPIRATION_TS_KEY), exp);
+    }
     return isAuthenticated ? true : router.createUrlTree([DEFAULT_LOGIN_ROUTE]);
   }
 

@@ -42,17 +42,16 @@ export class AuthService {
     this.httpResourceService.setCustomUrl(base);
     this.httpResourceService.setUrlType('custom');
 
-    this.httpResourceService
-      .post('logout', {})
-      .pipe(finalize(() => this.httpResourceService.setUrlType('default')))
-      .subscribe({
-        next: () => {
-          redirectTo(routeToDirect);
-        },
-        error: (err) => {
-          redirectTo(routeToDirect);
-        },
-      });
+    this.httpResourceService.post('logout', {}).subscribe({
+      next: () => {
+        this.httpResourceService.setUrlType('default');
+        redirectTo(routeToDirect);
+      },
+      error: (err) => {
+        this.httpResourceService.setUrlType('default');
+        redirectTo(routeToDirect);
+      },
+    });
   }
 
   public refresh(): void {

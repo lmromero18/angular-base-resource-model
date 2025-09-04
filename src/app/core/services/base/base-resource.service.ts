@@ -8,7 +8,13 @@ import { ModelSelectOption } from '../../models/select-option.model';
 import { IPagination } from '../../models/paginated-response.model';
 import { finalize, Observable } from 'rxjs';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
-import { ActionButton, Actions, ActionKey, resolve, ValueOrFn } from '../../models/core.types';
+import {
+  ActionButton,
+  Actions,
+  ActionKey,
+  resolve,
+  ValueOrFn,
+} from '../../models/core.types';
 
 /**
  * Clase base abstracta para gestionar recursos con formularios, peticiones HTTP y atributos declarativos.
@@ -48,7 +54,7 @@ export abstract class BaseResourceService<T = any> {
   /**
    * Inicializa otros recursos necesarios.
    */
-  public boot() { }
+  public boot() {}
 
   /** Permisos disponibles para el recurso. */
   public permissions: Record<string, string | boolean> = {
@@ -114,11 +120,10 @@ export abstract class BaseResourceService<T = any> {
         tooltip: 'Descargar',
         text: 'Descargar',
         allowedTypes: ['XLSX'],
-        click: () => { },
+        click: () => {},
       },
     };
   }
-
 
   /** Tipo de URL personalizada para el modelo. */
   private _customUrlType?: string;
@@ -612,12 +617,12 @@ export abstract class BaseResourceService<T = any> {
   public getActionButtons(
     item?: T,
     opts?: {
-      include?: string[];      // solo estas
-      exclude?: string[];      // excluir estas
-      section?: string;        // si usas secciones
+      include?: string[]; // solo estas
+      exclude?: string[]; // excluir estas
+      section?: string; // si usas secciones
       sort?: (a: string, b: string) => number; // orden personalizado
-      onlyEnabled?: boolean;   // omite las disabled
-      onlyAllowed?: boolean;   // omite las que can=false
+      onlyEnabled?: boolean; // omite las disabled
+      onlyAllowed?: boolean; // omite las que can=false
     },
   ): string[] {
     const keys = Object.keys(this.actions);
@@ -629,7 +634,8 @@ export abstract class BaseResourceService<T = any> {
       if (opts?.include && !opts.include.includes(name)) return false;
       if (opts?.exclude && opts.exclude.includes(name)) return false;
       if (opts?.section) {
-        const sec = typeof a.section === 'function' ? a.section(item) : a.section;
+        const sec =
+          typeof a.section === 'function' ? a.section(item) : a.section;
         if (sec !== opts.section) return false;
       }
       if (opts?.onlyAllowed && !this.can(name, item)) return false;
@@ -662,8 +668,12 @@ export abstract class BaseResourceService<T = any> {
   }
 
   // Atajos semánticos para las acciones built-in (si te gustan)
-  public get createButton(): ActionButton<T> { return this.actions['create']; }
-  public get downloadButton(): ActionButton<T> { return this.actions['download']; }
+  public get createButton(): ActionButton<T> {
+    return this.actions['create'];
+  }
+  public get downloadButton(): ActionButton<T> {
+    return this.actions['download'];
+  }
 
   // ======== EVALUADORES UNIFORMES (valor o función) ========
 
@@ -712,35 +722,75 @@ export abstract class BaseResourceService<T = any> {
 
   // ======== (Opcional) deprecación de setters específicos ========
   // Si quieres mantener compatibilidad temporal con tu API anterior:
-  public set canCreate(v: any) { this.setCan('create', v); }
-  public get canCreate() { return this.getActionButton('create')?.can; }
+  public set canCreate(v: any) {
+    this.setCan('create', v);
+  }
+  public get canCreate() {
+    return this.getActionButton('create')?.can;
+  }
 
-  public set canRead(v: any) { this.setCan('read', v); }
-  public get canRead() { return this.getActionButton('read')?.can; }
+  public set canRead(v: any) {
+    this.setCan('read', v);
+  }
+  public get canRead() {
+    return this.getActionButton('read')?.can;
+  }
 
-  public set canUpdate(v: any) { this.setCan('update', v); }
-  public get canUpdate() { return this.getActionButton('update')?.can; }
+  public set canUpdate(v: any) {
+    this.setCan('update', v);
+  }
+  public get canUpdate() {
+    return this.getActionButton('update')?.can;
+  }
 
-  public set canDelete(v: any) { this.setCan('delete', v); }
-  public get canDelete() { return this.getActionButton('delete')?.can; }
+  public set canDelete(v: any) {
+    this.setCan('delete', v);
+  }
+  public get canDelete() {
+    return this.getActionButton('delete')?.can;
+  }
 
-  public set canDownload(v: any) { this.setCan('download', v); }
-  public get canDownload() { return this.getActionButton('download')?.can; }
+  public set canDownload(v: any) {
+    this.setCan('download', v);
+  }
+  public get canDownload() {
+    return this.getActionButton('download')?.can;
+  }
 
-  public set disableUpdate(v: any) { this.setDisabled('update', v); }
-  public get disableUpdate() { return this.getActionButton('update')?.disable; }
+  public set disableUpdate(v: any) {
+    this.setDisabled('update', v);
+  }
+  public get disableUpdate() {
+    return this.getActionButton('update')?.disable;
+  }
 
-  public set disableRead(v: any) { this.setDisabled('read', v); }
-  public get disableRead() { return this.getActionButton('read')?.disable; }
+  public set disableRead(v: any) {
+    this.setDisabled('read', v);
+  }
+  public get disableRead() {
+    return this.getActionButton('read')?.disable;
+  }
 
-  public set disableDelete(v: any) { this.setDisabled('delete', v); }
-  public get disableDelete() { return this.getActionButton('delete')?.disable; }
+  public set disableDelete(v: any) {
+    this.setDisabled('delete', v);
+  }
+  public get disableDelete() {
+    return this.getActionButton('delete')?.disable;
+  }
 
-  public set disableDownload(v: any) { this.setDisabled('download', v); }
-  public get disableDownload() { return this.getActionButton('download')?.disable; }
+  public set disableDownload(v: any) {
+    this.setDisabled('download', v);
+  }
+  public get disableDownload() {
+    return this.getActionButton('download')?.disable;
+  }
 
-  public set allowedTypesDownload(v: any) { this.setAllowedTypes(v); }
-  public get allowedTypesDownload() { return (this.actions['download'] as any)?.allowedTypes; }
+  public set allowedTypesDownload(v: any) {
+    this.setAllowedTypes(v);
+  }
+  public get allowedTypesDownload() {
+    return (this.actions['download'] as any)?.allowedTypes;
+  }
 
   // public setAfter(callback: CallableFunction) {
   //   this.afterListResponse = callback;
