@@ -32,6 +32,10 @@ export class CarroTableComponent
       icon: () => 'eye',
       tooltip: () => 'Ver detalle',
     });
+    this.fetchData();
+  }
+
+  fetchData(): void {
     this.model.getAll((carros: ICarro[]) => {
       console.log(carros);
     });
@@ -39,6 +43,10 @@ export class CarroTableComponent
 
   logOut(): void {
     this.authService.logout();
+  }
+
+  refreshSession(): void {
+    this.authService.refresh();
   }
 
   ngDoCheck(): void {}

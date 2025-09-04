@@ -36,12 +36,9 @@ export class AuthService {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
-  public logout(
-    urlAuth?: string,
-    routeDefault: string = DEFAULT_LOGIN_ROUTE,
-  ): void {
+  public logout(routeToDirect: string = DEFAULT_LOGIN_ROUTE): void {
     // Use HttpResourceService with a custom base URL for the auth domain
-    const base = urlAuth ?? environment.urlAuth;
+    const base = environment.urlAuth;
     this.httpResourceService.setCustomUrl(base);
     this.httpResourceService.setUrlType('custom');
 
@@ -50,10 +47,27 @@ export class AuthService {
       .pipe(finalize(() => this.httpResourceService.setUrlType('default')))
       .subscribe({
         next: () => {
-          redirectTo(routeDefault);
+          redirectTo(routeToDirect);
         },
         error: (err) => {
-          redirectTo(routeDefault);
+          redirectTo(routeToDirect);
+        },
+      });
+  }
+
+  public refresh(): void {
+    // Use HttpResourceService with a custom base URL for the auth domain
+    const base = environment.urlAuth;
+    this.httpResourceService.setCustomUrl(base);
+    this.httpResourceService.setUrlType('custom');
+
+    this.httpResourceService
+      .post('refresh', {})
+      .pipe(finalize(() => this.httpResourceService.setUrlType('default')))
+      .subscribe({
+        next: () => {},
+        error: (err) => {
+          console.log('Error refreshing token');
         },
       });
   }
